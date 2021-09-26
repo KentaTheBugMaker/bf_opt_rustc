@@ -28,22 +28,7 @@ pub struct Interpreter<R: Read, W: Write> {
 }
 
 impl<R: Read, W: Write> Interpreter<R, W> {
-    pub fn load_program(code: &str, reader: R, writer: W) -> Self {
-        let program = code
-            .chars()
-            .filter(|x| matches!(x, '>' | '<' | '+' | '-' | '.' | ',' | '[' | ']'))
-            .map(|x| match x {
-                '>' => BFInstruction::IncPtr,
-                '<' => BFInstruction::DecPtr,
-                '+' => BFInstruction::Inc,
-                '-' => BFInstruction::Dec,
-                '.' => BFInstruction::Write,
-                ',' => BFInstruction::Read,
-                '[' => BFInstruction::LoopStart,
-                ']' => BFInstruction::LoopEnd,
-                _ => unreachable!(),
-            })
-            .collect();
+    pub fn load_program(program: Vec<BFInstruction>, reader: R, writer: W) -> Self {
         Self {
             mem: vec![0; 30000],
             program,
@@ -67,11 +52,13 @@ impl<R: Read, W: Write> Interpreter<R, W> {
                 }
                 BFInstruction::Read => {
                     self.reader
-                        .read_exact(&mut self.mem[self.data_ptr..self.data_ptr + 1]).unwrap();
+                        .read_exact(&mut self.mem[self.data_ptr..self.data_ptr + 1])
+                        .unwrap();
                 }
                 BFInstruction::Write => {
                     self.writer
-                        .write_all(&self.mem[self.data_ptr..self.data_ptr + 1]).unwrap();
+                        .write_all(&self.mem[self.data_ptr..self.data_ptr + 1])
+                        .unwrap();
                 }
                 BFInstruction::LoopStart => {
                     let mut depth = 1;
