@@ -8,7 +8,7 @@ mod optimizer;
 mod parser;
 
 fn main() {
-    let code = include_str!("../fizz_bazz.b");
+    let code = include_str!("../factor.b");
     let bf_ir = src_to_ir(code);
     let opt_ir_inc_dec2 = optimizer::optimize(&bf_ir, OptLevel::IncDecOpt2);
     let opt_ir_zero_clear = optimizer::optimize(&bf_ir, OptLevel::ZeroClear);
@@ -25,6 +25,7 @@ fn main() {
     let writer = std::io::stdout();
 
     let bench_data: Vec<u8> = include_bytes!("../bench_number.txt").to_vec();
+    /*
     let instant = Instant::now();
     optimizer::exec_opt_ir(opt_ir_inc_dec2, bench_data.as_slice(), writer, false);
     let inc_dec_opt_2 = instant.elapsed();
@@ -39,7 +40,7 @@ fn main() {
     optimizer::exec_opt_ir(opt_ir_move_ptr, bench_data.as_slice(), writer, false);
     let move_ptr_opt = instant.elapsed();
     println!("move_ptr interpreter elapsed {:?}", move_ptr_opt);
-    let writer = std::io::stdout();
+    let writer = std::io::stdout();*/
     let instant = Instant::now();
     optimizer::exec_opt_ir(opt_ir_data_move, bench_data.as_slice(), writer, false);
     let move_data_opt = instant.elapsed();

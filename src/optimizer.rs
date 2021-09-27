@@ -1,10 +1,19 @@
 use crate::interpreter::BFInstruction;
 use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Dec, DecPtr, Inc, IncPtr, LoopEnd, LoopStart, MoveLeft, MoveRight, Nop, Read, Sub,
-    SubPtr, Write, ZeroClear, JNZ, JZ,
+    Add, AddPtr, Dec, DecPtr, Inc, IncPtr, LoopEnd, LoopStart, MoveLeft, MoveRight, MovingAdd, Nop,
+    Read, Sub, SubPtr, Write, ZeroClear, JNZ, JZ,
 };
 use crate::optimizer::OptLevel::{IncDecOpt1, IncDecOpt2};
-
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Direction {
+    Left,
+    Right,
+}
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Sign {
+    Plus,
+    Minus,
+}
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum OptInstruction {
     Add(u8),
@@ -29,6 +38,8 @@ pub enum OptInstruction {
     MoveLeft(usize),
     //[Dec AddPtr Inc SubPtr]
     MoveRight(usize),
+    //direction offset sign multiplier
+    MovingAdd(Direction, usize, Sign, u8),
     //[AddPtr]
     PtrMoveRight(usize),
     //[SubPtr]
@@ -148,59 +159,69 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     if opt_level == OptLevel::LoopPtrMove {
         return ir_stack;
     }
-    //0  1     2     3    4   5
-    //[ Dec SubPtr Inc AddPtr ]
-    //[ Dec AddPtr Inc SubPtr ]
+    // previous nop elimination there are no nops current ir so i can
+    //0  1     2     3       4    5
+    //[ Dec SubPtr Inc/Dec AddPtr ]
+    //[ Dec AddPtr Inc/Dec SubPtr ]
+    let test_inc_dec = |ir: OptInstruction| -> Option<(Sign, u8)> {
+        match ir {
+            Add(x) => Some((Sign::Plus, x)),
+            Sub(x) => Some((Sign::Minus, x)),
+            Inc => Some((Sign::Plus, 1)),
+            Dec => Some((Sign::Minus, 1)),
+            _ => None,
+        }
+    };
     if ir_stack.len() > 5 {
         for i in 0..(ir_stack.len() - 5) {
-            if ir_stack[i] == LoopStart && ir_stack[i + 5] == LoopEnd {
-
-                if ir_stack[i + 1] == Dec {
-                    if ir_stack[i+2]==DecPtr && ir_stack[i+3]==Inc && ir_stack[i+4] == IncPtr{
-                        ir_stack[i + 0] = Nop;
-                        ir_stack[i + 1] = Nop;
-                        ir_stack[i + 2] = Nop;
-                        ir_stack[i + 3] = MoveLeft(1);
-                        ir_stack[i + 4] = Nop;
-                        ir_stack[i + 5] = Nop;
-                    }
-                    if ir_stack[i+2]==IncPtr && ir_stack[i+3]==Inc && ir_stack[i+4] == DecPtr{
-                        ir_stack[i + 0] = Nop;
-                        ir_stack[i + 1] = Nop;
-                        ir_stack[i + 2] = Nop;
-                        ir_stack[i + 3] = MoveLeft(2);
-                        ir_stack[i + 4] = Nop;
-                        ir_stack[i + 5] = Nop;
-                    }
-                    if let SubPtr(i_p) = ir_stack[i + 2] {
-                        if let AddPtr(d_p) = ir_stack[i + 4] {
-                            if i_p == d_p && ir_stack[i + 3] == Inc {
-                                ir_stack[i + 0] = Nop;
-                                ir_stack[i + 1] = Nop;
-                                ir_stack[i + 2] = Nop;
-                                ir_stack[i + 3] = MoveLeft(i_p);
-                                ir_stack[i + 4] = Nop;
-                                ir_stack[i + 5] = Nop;
+            let mut generated_ir = Nop;
+            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Dec && ir_stack[i + 5] == LoopEnd {
+                match ir_stack[i + 2] {
+                    AddPtr(i_x) => {
+                        if ir_stack[i + 4] == SubPtr(i_x) {
+                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
+                                generated_ir = MovingAdd(Direction::Right, i_x, ir.0, ir.1)
                             }
                         }
                     }
-
-                    if let AddPtr(i_p) = ir_stack[i + 2] {
-                        if let SubPtr(d_p) = ir_stack[i + 4] {
-                            if i_p == d_p && ir_stack[i + 3] == Inc {
-                                ir_stack[i + 0] = Nop;
-                                ir_stack[i + 1] = Nop;
-                                ir_stack[i + 2] = Nop;
-                                ir_stack[i + 3] = MoveRight(i_p);
-                                ir_stack[i + 4] = Nop;
-                                ir_stack[i + 5] = Nop;
+                    /*
+                    SubPtr(i_x) => {
+                        if ir_stack[i + 4] == AddPtr(i_x) {
+                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
+                                generated_ir = MovingAdd(Direction::Left, i_x, ir.0, ir.1)
+                            }
+                        }
+                    }*/
+                    IncPtr => {
+                        if ir_stack[i + 4] == DecPtr {
+                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
+                                generated_ir = MovingAdd(Direction::Right, 1, ir.0, ir.1)
                             }
                         }
                     }
+                    /*
+                    DecPtr => {
+                        if ir_stack[i + 4] == IncPtr {
+                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
+                                generated_ir = MovingAdd(Direction::Right, 1, ir.0, ir.1)
+                            }
+                        }
+                    }*/
+                    _ => {}
                 }
+            }
+            //insert ir
+            if generated_ir != Nop {
+                ir_stack[i] = Nop;
+                ir_stack[i + 1] = Nop;
+                ir_stack[i + 2] = Nop;
+                ir_stack[i + 3] = generated_ir;
+                ir_stack[i + 4] = Nop;
+                ir_stack[i + 5] = Nop;
             }
         }
     }
+
     ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
     if opt_level == OptLevel::LoopDataMove {
         return ir_stack;
@@ -226,7 +247,7 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
                     }
                     ir_stack[saved_i_ptr] = JZ(i_ptr);
                     ir_stack[i_ptr] = JNZ(saved_i_ptr);
-                    i_ptr=saved_i_ptr;
+                    i_ptr = saved_i_ptr;
                 }
                 _ => {}
             }
@@ -336,6 +357,29 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                         data_ptr -= *x;
                     }
                 }
+
+                MovingAdd(direction, offset, sign, multiplier) => match direction {
+                    Direction::Left => match sign {
+                        Sign::Plus => {
+                            mem[data_ptr - *offset] += mem[data_ptr].wrapping_mul(*multiplier);
+                            mem[data_ptr] = 0;
+                        }
+                        Sign::Minus => {
+                            mem[data_ptr - *offset] -= mem[data_ptr].wrapping_mul(*multiplier);
+                            mem[data_ptr] = 0;
+                        }
+                    },
+                    Direction::Right => match sign {
+                        Sign::Plus => {
+                            mem[data_ptr + *offset] += mem[data_ptr].wrapping_mul(*multiplier);
+                            mem[data_ptr] = 0;
+                        }
+                        Sign::Minus => {
+                            mem[data_ptr + *offset] -= mem[data_ptr].wrapping_mul(*multiplier);
+                            mem[data_ptr] = 0;
+                        }
+                    },
+                },
             }
             // if overflow detected dump all memory to std out
             // one line per 16 byte display
@@ -343,6 +387,7 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                 for line in mem.chunks(16) {
                     println!("{:0x?}", line);
                 }
+                return;
             }
         } else {
             return;
