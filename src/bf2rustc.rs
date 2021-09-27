@@ -20,7 +20,7 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
             }
             OptInstruction::JZ(_) => {
                 nest += 1;
-                "while mem[data_ptr]!=0{\n".to_owned()
+                "while mem[data_ptr] != 0 {\n".to_owned()
             }
             OptInstruction::Jnz(_) => {
                 nest -= 1;
