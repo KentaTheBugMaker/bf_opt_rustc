@@ -1,1070 +1,1020 @@
-0 LoopStart JZ(1)
-1 LoopEnd JNZ(0)
-2 AddPtr(30) AddPtr(30)
-3 Dec Dec
-4 SubPtr(9) SubPtr(9)
-5 Inc Inc
-6 LoopStart JZ(18)
-7 Dec Dec
-8 PtrMoveRight(10) PtrMoveRight(10)
-9 ZeroClear ZeroClear
-10 SubPtr(10) SubPtr(10)
-11 LoopStart LoopStart
-12 MoveRight(10) MoveRight(10)
-13 SubPtr(10) SubPtr(10)
-14 LoopEnd LoopEnd
-15 AddPtr(10) AddPtr(10)
-16 Read Read
-17 Sub(10) Sub(10)
-18 LoopEnd JNZ(6)
-19 AddPtr(10) AddPtr(10)
-20 LoopStart JZ(25)
-21 Sub(37) Sub(37)
-22 AddPtr(9) AddPtr(9)
-23 Dec Dec
-24 IncPtr IncPtr
-25 LoopEnd JNZ(20)
-26 DecPtr DecPtr
-27 LoopStart JZ(38)
-28 Inc Inc
-29 IncPtr IncPtr
-30 LoopStart LoopStart
-31 AddPtr(9) AddPtr(9)
-32 Inc Inc
-33 IncPtr IncPtr
-34 LoopEnd LoopEnd
-35 DecPtr DecPtr
-36 Dec Dec
-37 SubPtr(10) SubPtr(10)
-38 LoopEnd JNZ(27)
-39 Dec Dec
-40 LoopStart JZ(46)
-41 IncPtr IncPtr
-42 Add(48) Add(48)
-43 Write Write
-44 Sub(48) Sub(48)
-45 SubPtr(11) SubPtr(11)
-46 LoopEnd JNZ(40)
-47 Add(58) Add(58)
-48 Write Write
-49 Sub(26) Sub(26)
-50 Write Write
-51 ZeroClear ZeroClear
-52 AddPtr(12) AddPtr(12)
-53 Add(2) Add(2)
-54 SubPtr(4) SubPtr(4)
-55 Inc Inc
-56 LoopStart JZ(1045)
-57 ZeroClear ZeroClear
-58 AddPtr(2) AddPtr(2)
-59 LoopStart LoopStart
-60 AddPtr(4) AddPtr(4)
-61 ZeroClear ZeroClear
-62 IncPtr IncPtr
-63 ZeroClear ZeroClear
-64 IncPtr IncPtr
-65 ZeroClear ZeroClear
-66 IncPtr IncPtr
-67 ZeroClear ZeroClear
-68 IncPtr IncPtr
-69 ZeroClear ZeroClear
-70 IncPtr IncPtr
-71 ZeroClear ZeroClear
-72 SubPtr(7) SubPtr(7)
-73 LoopStart LoopStart
-74 Dec Dec
-75 AddPtr(3) AddPtr(3)
-76 Inc Inc
-77 IncPtr IncPtr
-78 Inc Inc
-79 SubPtr(4) SubPtr(4)
-80 LoopEnd LoopEnd
-81 AddPtr(8) AddPtr(8)
-82 LoopEnd LoopEnd
-83 SubPtr(10) SubPtr(10)
-84 LoopStart LoopStart
-85 AddPtr(6) AddPtr(6)
-86 MoveLeft(4) MoveLeft(4)
-87 SubPtr(16) SubPtr(16)
-88 LoopEnd LoopEnd
-89 AddPtr(10) AddPtr(10)
-90 LoopStart LoopStart
-91 IncPtr IncPtr
-92 LoopStart LoopStart
-93 Dec Dec
-94 AddPtr(3) AddPtr(3)
-95 Inc Inc
-96 AddPtr(2) AddPtr(2)
-97 Inc Inc
-98 SubPtr(5) SubPtr(5)
-99 LoopEnd LoopEnd
-100 AddPtr(9) AddPtr(9)
-101 LoopEnd LoopEnd
-102 SubPtr(10) SubPtr(10)
-103 LoopStart LoopStart
-104 AddPtr(6) AddPtr(6)
-105 MoveLeft(5) MoveLeft(5)
-106 SubPtr(16) SubPtr(16)
-107 LoopEnd LoopEnd
-108 AddPtr(10) AddPtr(10)
-109 LoopStart LoopStart
-110 AddPtr(3) AddPtr(3)
-111 ZeroClear ZeroClear
-112 AddPtr(3) AddPtr(3)
-113 ZeroClear ZeroClear
-114 IncPtr IncPtr
-115 ZeroClear ZeroClear
-116 AddPtr(3) AddPtr(3)
-117 LoopEnd LoopEnd
-118 SubPtr(10) SubPtr(10)
-119 PtrMoveLeft(10) PtrMoveLeft(10)
-120 AddPtr(9) AddPtr(9)
-121 ZeroClear ZeroClear
-122 AddPtr(7) AddPtr(7)
-123 Inc Inc
-124 SubPtr(8) SubPtr(8)
-125 ZeroClear ZeroClear
-126 Inc Inc
-127 LoopStart LoopStart
-128 Dec Dec
-129 AddPtr(2) AddPtr(2)
-130 LoopStart LoopStart
-131 AddPtr(6) AddPtr(6)
-132 LoopStart LoopStart
-133 Dec Dec
-134 IncPtr IncPtr
-135 Add(2) Add(2)
-136 DecPtr DecPtr
-137 LoopEnd LoopEnd
-138 AddPtr(4) AddPtr(4)
-139 LoopEnd LoopEnd
-140 SubPtr(10) SubPtr(10)
-141 LoopStart LoopStart
-142 AddPtr(8) AddPtr(8)
-143 ZeroClear ZeroClear
-144 IncPtr IncPtr
-145 ZeroClear ZeroClear
-146 SubPtr(4) SubPtr(4)
-147 LoopStart LoopStart
-148 Dec Dec
-149 AddPtr(3) AddPtr(3)
-150 Add(2) Add(2)
-151 SubPtr(3) SubPtr(3)
-152 LoopEnd LoopEnd
-153 SubPtr(15) SubPtr(15)
-154 LoopEnd LoopEnd
-155 AddPtr(10) AddPtr(10)
-156 LoopStart LoopStart
-157 AddPtr(8) AddPtr(8)
-158 LoopStart LoopStart
-159 Dec Dec
-160 IncPtr IncPtr
-161 Inc Inc
-162 DecPtr DecPtr
-163 LoopStart LoopStart
-164 Dec Dec
-165 IncPtr IncPtr
-166 Inc Inc
-167 DecPtr DecPtr
-168 LoopStart LoopStart
-169 Dec Dec
-170 IncPtr IncPtr
-171 Inc Inc
-172 DecPtr DecPtr
-173 LoopStart LoopStart
-174 Dec Dec
-175 IncPtr IncPtr
-176 Inc Inc
-177 DecPtr DecPtr
-178 LoopStart LoopStart
-179 Dec Dec
-180 IncPtr IncPtr
-181 Inc Inc
-182 DecPtr DecPtr
-183 LoopStart LoopStart
-184 Dec Dec
-185 IncPtr IncPtr
-186 Inc Inc
-187 DecPtr DecPtr
-188 LoopStart LoopStart
-189 Dec Dec
-190 IncPtr IncPtr
-191 Inc Inc
-192 DecPtr DecPtr
-193 LoopStart LoopStart
-194 Dec Dec
-195 IncPtr IncPtr
-196 Inc Inc
-197 DecPtr DecPtr
-198 LoopStart LoopStart
-199 Dec Dec
-200 IncPtr IncPtr
-201 Inc Inc
-202 DecPtr DecPtr
-203 LoopStart LoopStart
-204 Dec Dec
-205 IncPtr IncPtr
-206 Sub(9) Sub(9)
-207 AddPtr(9) AddPtr(9)
-208 Inc Inc
-209 SubPtr(10) SubPtr(10)
-210 LoopStart LoopStart
-211 Dec Dec
-212 IncPtr IncPtr
-213 Inc Inc
-214 DecPtr DecPtr
-215 LoopEnd LoopEnd
-216 LoopEnd LoopEnd
-217 LoopEnd LoopEnd
-218 LoopEnd LoopEnd
-219 LoopEnd LoopEnd
-220 LoopEnd LoopEnd
-221 LoopEnd LoopEnd
-222 LoopEnd LoopEnd
-223 LoopEnd LoopEnd
-224 LoopEnd LoopEnd
-225 LoopEnd LoopEnd
-226 AddPtr(2) AddPtr(2)
-227 LoopEnd LoopEnd
-228 SubPtr(10) SubPtr(10)
-229 LoopStart LoopStart
-230 AddPtr(9) AddPtr(9)
-231 LoopStart LoopStart
-232 Dec Dec
-233 DecPtr DecPtr
-234 Inc Inc
-235 SubPtr(3) SubPtr(3)
-236 Inc Inc
-237 AddPtr(4) AddPtr(4)
-238 LoopEnd LoopEnd
-239 SubPtr(19) SubPtr(19)
-240 LoopEnd LoopEnd
-241 AddPtr(10) AddPtr(10)
-242 LoopStart LoopStart
-243 AddPtr(7) AddPtr(7)
-244 LoopStart LoopStart
-245 Dec Dec
-246 DecPtr DecPtr
-247 Inc Inc
-248 IncPtr IncPtr
-249 LoopStart LoopStart
-250 Dec Dec
-251 DecPtr DecPtr
-252 Inc Inc
-253 IncPtr IncPtr
-254 LoopStart LoopStart
-255 Dec Dec
-256 DecPtr DecPtr
-257 Inc Inc
-258 IncPtr IncPtr
-259 LoopStart LoopStart
-260 Dec Dec
-261 DecPtr DecPtr
-262 Inc Inc
-263 IncPtr IncPtr
-264 LoopStart LoopStart
-265 Dec Dec
-266 DecPtr DecPtr
-267 Inc Inc
-268 IncPtr IncPtr
-269 LoopStart LoopStart
-270 Dec Dec
-271 DecPtr DecPtr
-272 Inc Inc
-273 IncPtr IncPtr
-274 LoopStart LoopStart
-275 Dec Dec
-276 DecPtr DecPtr
-277 Inc Inc
-278 IncPtr IncPtr
-279 LoopStart LoopStart
-280 Dec Dec
-281 DecPtr DecPtr
-282 Inc Inc
-283 IncPtr IncPtr
-284 LoopStart LoopStart
-285 Dec Dec
-286 DecPtr DecPtr
-287 Inc Inc
-288 IncPtr IncPtr
-289 LoopStart LoopStart
-290 Dec Dec
-291 DecPtr DecPtr
-292 Sub(9) Sub(9)
-293 AddPtr(11) AddPtr(11)
-294 Inc Inc
-295 SubPtr(10) SubPtr(10)
-296 LoopStart LoopStart
-297 Dec Dec
-298 DecPtr DecPtr
-299 Inc Inc
-300 IncPtr IncPtr
-301 LoopEnd LoopEnd
-302 LoopEnd LoopEnd
-303 LoopEnd LoopEnd
-304 LoopEnd LoopEnd
-305 LoopEnd LoopEnd
-306 LoopEnd LoopEnd
-307 LoopEnd LoopEnd
-308 LoopEnd LoopEnd
-309 LoopEnd LoopEnd
-310 LoopEnd LoopEnd
-311 LoopEnd LoopEnd
-312 AddPtr(3) AddPtr(3)
-313 LoopEnd LoopEnd
-314 SubPtr(10) SubPtr(10)
-315 LoopStart LoopStart
-316 AddPtr(4) AddPtr(4)
-317 LoopStart LoopStart
-318 Dec Dec
-319 AddPtr(3) AddPtr(3)
-320 Inc Inc
-321 AddPtr(2) AddPtr(2)
-322 Inc Inc
-323 SubPtr(5) SubPtr(5)
-324 LoopEnd LoopEnd
-325 SubPtr(14) SubPtr(14)
-326 LoopEnd LoopEnd
-327 AddPtr(10) AddPtr(10)
-328 LoopStart LoopStart
-329 AddPtr(7) AddPtr(7)
-330 MoveLeft(3) MoveLeft(3)
-331 AddPtr(3) AddPtr(3)
-332 LoopEnd LoopEnd
-333 SubPtr(10) SubPtr(10)
-334 LoopStart LoopStart
-335 AddPtr(8) AddPtr(8)
-336 LoopStart LoopStart
-337 Dec Dec
-338 IncPtr IncPtr
-339 Dec Dec
-340 DecPtr DecPtr
-341 LoopEnd LoopEnd
-342 IncPtr IncPtr
-343 LoopStart LoopStart
-344 SubPtr(9) SubPtr(9)
-345 LoopStart LoopStart
-346 DecPtr DecPtr
-347 ZeroClear ZeroClear
-348 AddPtr(10) AddPtr(10)
-349 MoveLeft(10) MoveLeft(10)
-350 SubPtr(19) SubPtr(19)
-351 LoopEnd LoopEnd
-352 AddPtr(19) AddPtr(19)
-353 LoopEnd LoopEnd
-354 SubPtr(19) SubPtr(19)
-355 LoopEnd LoopEnd
-356 AddPtr(9) AddPtr(9)
-357 LoopStart LoopStart
-358 Inc Inc
-359 LoopStart LoopStart
-360 Inc Inc
-361 LoopStart LoopStart
-362 Inc Inc
-363 LoopStart LoopStart
-364 Inc Inc
-365 LoopStart LoopStart
-366 Inc Inc
-367 LoopStart LoopStart
-368 Inc Inc
-369 LoopStart LoopStart
-370 Inc Inc
-371 LoopStart LoopStart
-372 Inc Inc
-373 LoopStart LoopStart
-374 Inc Inc
-375 LoopStart LoopStart
-376 Inc Inc
-377 LoopStart LoopStart
-378 ZeroClear ZeroClear
-379 DecPtr DecPtr
-380 Inc Inc
-381 IncPtr IncPtr
-382 LoopEnd LoopEnd
-383 LoopEnd LoopEnd
-384 LoopEnd LoopEnd
-385 LoopEnd LoopEnd
-386 LoopEnd LoopEnd
-387 LoopEnd LoopEnd
-388 LoopEnd LoopEnd
-389 LoopEnd LoopEnd
-390 LoopEnd LoopEnd
-391 LoopEnd LoopEnd
-392 LoopEnd LoopEnd
-393 DecPtr DecPtr
-394 LoopEnd LoopEnd
-395 AddPtr(8) AddPtr(8)
-396 LoopStart LoopStart
-397 SubPtr(6) SubPtr(6)
-398 LoopStart LoopStart
-399 AddPtr(8) AddPtr(8)
-400 ZeroClear ZeroClear
-401 IncPtr IncPtr
-402 ZeroClear ZeroClear
-403 SubPtr(5) SubPtr(5)
-404 LoopStart LoopStart
-405 Dec Dec
-406 AddPtr(3) AddPtr(3)
-407 Inc Inc
-408 IncPtr IncPtr
-409 Inc Inc
-410 SubPtr(4) SubPtr(4)
-411 LoopEnd LoopEnd
-412 AddPtr(6) AddPtr(6)
-413 LoopEnd LoopEnd
-414 SubPtr(10) SubPtr(10)
-415 LoopStart LoopStart
-416 AddPtr(8) AddPtr(8)
-417 MoveLeft(4) MoveLeft(4)
-418 SubPtr(3) SubPtr(3)
-419 LoopStart LoopStart
-420 Dec Dec
-421 AddPtr(3) AddPtr(3)
-422 Inc Inc
-423 IncPtr IncPtr
-424 Inc Inc
-425 SubPtr(4) SubPtr(4)
-426 LoopEnd LoopEnd
-427 SubPtr(15) SubPtr(15)
-428 LoopEnd LoopEnd
-429 AddPtr(10) AddPtr(10)
-430 LoopStart LoopStart
-431 AddPtr(9) AddPtr(9)
-432 MoveLeft(4) MoveLeft(4)
-433 IncPtr IncPtr
-434 LoopEnd LoopEnd
-435 SubPtr(10) SubPtr(10)
-436 LoopStart LoopStart
-437 AddPtr(8) AddPtr(8)
-438 LoopStart LoopStart
-439 Dec Dec
-440 DecPtr DecPtr
-441 Dec Dec
-442 IncPtr IncPtr
-443 LoopEnd LoopEnd
-444 SubPtr(18) SubPtr(18)
-445 LoopEnd LoopEnd
-446 AddPtr(10) AddPtr(10)
-447 LoopStart LoopStart
-448 AddPtr(7) AddPtr(7)
-449 LoopStart LoopStart
-450 Dec Dec
-451 IncPtr IncPtr
-452 Inc Inc
-453 DecPtr DecPtr
-454 LoopStart LoopStart
-455 Dec Dec
-456 IncPtr IncPtr
-457 Inc Inc
-458 DecPtr DecPtr
-459 LoopStart LoopStart
-460 Dec Dec
-461 IncPtr IncPtr
-462 Inc Inc
-463 DecPtr DecPtr
-464 LoopStart LoopStart
-465 Dec Dec
-466 IncPtr IncPtr
-467 Inc Inc
-468 DecPtr DecPtr
-469 LoopStart LoopStart
-470 Dec Dec
-471 IncPtr IncPtr
-472 Inc Inc
-473 DecPtr DecPtr
-474 LoopStart LoopStart
-475 Dec Dec
-476 IncPtr IncPtr
-477 Inc Inc
-478 DecPtr DecPtr
-479 LoopStart LoopStart
-480 Dec Dec
-481 IncPtr IncPtr
-482 Inc Inc
-483 DecPtr DecPtr
-484 LoopStart LoopStart
-485 Dec Dec
-486 IncPtr IncPtr
-487 Inc Inc
-488 DecPtr DecPtr
-489 LoopStart LoopStart
-490 Dec Dec
-491 IncPtr IncPtr
-492 Inc Inc
-493 DecPtr DecPtr
-494 LoopStart LoopStart
-495 Dec Dec
-496 IncPtr IncPtr
-497 Inc Inc
-498 DecPtr DecPtr
-499 LoopStart LoopStart
-500 Add(10) Add(10)
-501 LoopStart LoopStart
-502 Inc Inc
-503 IncPtr IncPtr
-504 Dec Dec
-505 DecPtr DecPtr
-506 LoopEnd LoopEnd
-507 AddPtr(10) AddPtr(10)
-508 Dec Dec
-509 SubPtr(10) SubPtr(10)
-510 LoopEnd LoopEnd
-511 LoopEnd LoopEnd
-512 LoopEnd LoopEnd
-513 LoopEnd LoopEnd
-514 LoopEnd LoopEnd
-515 LoopEnd LoopEnd
-516 LoopEnd LoopEnd
-517 LoopEnd LoopEnd
-518 LoopEnd LoopEnd
-519 LoopEnd LoopEnd
-520 LoopEnd LoopEnd
-521 AddPtr(3) AddPtr(3)
-522 LoopEnd LoopEnd
-523 AddPtr(7) AddPtr(7)
-524 Inc Inc
-525 LoopStart LoopStart
-526 ZeroClear ZeroClear
-527 SubPtr(17) SubPtr(17)
-528 LoopStart LoopStart
-529 AddPtr(4) AddPtr(4)
-530 ZeroClear ZeroClear
-531 AddPtr(4) AddPtr(4)
-532 MoveLeft(4) MoveLeft(4)
-533 SubPtr(2) SubPtr(2)
-534 MoveRight(2) MoveRight(2)
-535 SubPtr(16) SubPtr(16)
-536 LoopEnd LoopEnd
-537 AddPtr(10) AddPtr(10)
-538 LoopStart LoopStart
-539 AddPtr(8) AddPtr(8)
-540 LoopStart LoopStart
-541 Dec Dec
-542 IncPtr IncPtr
-543 Inc Inc
-544 SubPtr(3) SubPtr(3)
-545 Inc Inc
-546 AddPtr(2) AddPtr(2)
-547 LoopEnd LoopEnd
-548 AddPtr(2) AddPtr(2)
-549 LoopEnd LoopEnd
-550 SubPtr(10) SubPtr(10)
-551 LoopStart LoopStart
-552 AddPtr(3) AddPtr(3)
-553 MoveRight(6) MoveRight(6)
-554 SubPtr(13) SubPtr(13)
-555 LoopEnd LoopEnd
-556 AddPtr(10) AddPtr(10)
-557 LoopStart LoopStart
-558 AddPtr(9) AddPtr(9)
-559 LoopStart LoopStart
-560 Dec Dec
-561 SubPtr(6) SubPtr(6)
-562 Inc Inc
-563 AddPtr(6) AddPtr(6)
-564 LoopStart LoopStart
-565 Dec Dec
-566 SubPtr(6) SubPtr(6)
-567 Inc Inc
-568 AddPtr(6) AddPtr(6)
-569 LoopStart LoopStart
-570 Dec Dec
-571 SubPtr(6) SubPtr(6)
-572 Inc Inc
-573 AddPtr(6) AddPtr(6)
-574 LoopStart LoopStart
-575 Dec Dec
-576 SubPtr(6) SubPtr(6)
-577 Inc Inc
-578 AddPtr(6) AddPtr(6)
-579 LoopStart LoopStart
-580 Dec Dec
-581 SubPtr(6) SubPtr(6)
-582 Inc Inc
-583 AddPtr(6) AddPtr(6)
-584 LoopStart LoopStart
-585 Dec Dec
-586 SubPtr(6) SubPtr(6)
-587 Inc Inc
-588 AddPtr(6) AddPtr(6)
-589 LoopStart LoopStart
-590 Dec Dec
-591 SubPtr(6) SubPtr(6)
-592 Inc Inc
-593 AddPtr(6) AddPtr(6)
-594 LoopStart LoopStart
-595 Dec Dec
-596 SubPtr(6) SubPtr(6)
-597 Inc Inc
-598 AddPtr(6) AddPtr(6)
-599 LoopStart LoopStart
-600 Dec Dec
-601 SubPtr(6) SubPtr(6)
-602 Inc Inc
-603 AddPtr(6) AddPtr(6)
-604 LoopStart LoopStart
-605 Dec Dec
-606 SubPtr(6) SubPtr(6)
-607 Sub(9) Sub(9)
-608 AddPtr(16) AddPtr(16)
-609 Inc Inc
-610 SubPtr(10) SubPtr(10)
-611 MoveLeft(6) MoveLeft(6)
-612 LoopEnd LoopEnd
-613 LoopEnd LoopEnd
-614 LoopEnd LoopEnd
-615 LoopEnd LoopEnd
-616 LoopEnd LoopEnd
-617 LoopEnd LoopEnd
-618 LoopEnd LoopEnd
-619 LoopEnd LoopEnd
-620 LoopEnd LoopEnd
-621 LoopEnd LoopEnd
-622 IncPtr IncPtr
-623 LoopEnd LoopEnd
-624 AddPtr(7) AddPtr(7)
-625 LoopEnd LoopEnd
-626 SubPtr(17) SubPtr(17)
-627 PtrMoveLeft(10) PtrMoveLeft(10)
-628 AddPtr(10) AddPtr(10)
-629 LoopStart LoopStart
-630 AddPtr(8) AddPtr(8)
-631 ZeroClear ZeroClear
-632 SubPtr(2) SubPtr(2)
-633 LoopStart LoopStart
-634 Dec Dec
-635 IncPtr IncPtr
-636 Inc Inc
-637 DecPtr DecPtr
-638 LoopEnd LoopEnd
-639 DecPtr DecPtr
-640 MoveRight(3) MoveRight(3)
-641 AddPtr(5) AddPtr(5)
-642 LoopEnd LoopEnd
-643 SubPtr(10) SubPtr(10)
-644 LoopStart LoopStart
-645 Inc Inc
-646 AddPtr(7) AddPtr(7)
-647 LoopStart LoopStart
-648 Dec Dec
-649 SubPtr(7) SubPtr(7)
-650 Inc Inc
-651 AddPtr(7) AddPtr(7)
-652 LoopStart LoopStart
-653 Dec Dec
-654 SubPtr(7) SubPtr(7)
-655 Dec Dec
-656 AddPtr(6) AddPtr(6)
-657 Inc Inc
-658 IncPtr IncPtr
-659 LoopStart LoopStart
-660 Dec Dec
-661 SubPtr(7) SubPtr(7)
-662 Inc Inc
-663 AddPtr(7) AddPtr(7)
-664 LoopStart LoopStart
-665 Dec Dec
-666 SubPtr(7) SubPtr(7)
-667 Dec Dec
-668 AddPtr(6) AddPtr(6)
-669 Inc Inc
-670 IncPtr IncPtr
-671 LoopStart LoopStart
-672 Dec Dec
-673 SubPtr(7) SubPtr(7)
-674 Inc Inc
-675 AddPtr(7) AddPtr(7)
-676 LoopStart LoopStart
-677 Dec Dec
-678 SubPtr(7) SubPtr(7)
-679 Dec Dec
-680 AddPtr(6) AddPtr(6)
-681 Inc Inc
-682 IncPtr IncPtr
-683 LoopStart LoopStart
-684 Dec Dec
-685 SubPtr(7) SubPtr(7)
-686 Inc Inc
-687 AddPtr(7) AddPtr(7)
-688 LoopStart LoopStart
-689 Dec Dec
-690 SubPtr(7) SubPtr(7)
-691 Dec Dec
-692 AddPtr(6) AddPtr(6)
-693 Inc Inc
-694 IncPtr IncPtr
-695 MoveLeft(7) MoveLeft(7)
-696 LoopEnd LoopEnd
-697 LoopEnd LoopEnd
-698 LoopEnd LoopEnd
-699 LoopEnd LoopEnd
-700 LoopEnd LoopEnd
-701 LoopEnd LoopEnd
-702 LoopEnd LoopEnd
-703 LoopEnd LoopEnd
-704 SubPtr(7) SubPtr(7)
-705 MoveRight(7) MoveRight(7)
-706 Dec Dec
-707 SubPtr(10) SubPtr(10)
-708 LoopEnd LoopEnd
-709 AddPtr(7) AddPtr(7)
-710 MoveLeft(11) MoveLeft(11)
-711 AddPtr(3) AddPtr(3)
-712 LoopStart LoopStart
-713 AddPtr(7) AddPtr(7)
-714 LoopStart LoopStart
-715 Dec Dec
-716 SubPtr(11) SubPtr(11)
-717 Add(5) Add(5)
-718 AddPtr(11) AddPtr(11)
-719 LoopEnd LoopEnd
-720 AddPtr(3) AddPtr(3)
-721 LoopEnd LoopEnd
-722 SubPtr(10) SubPtr(10)
-723 LoopStart LoopStart
-724 Inc Inc
-725 AddPtr(8) AddPtr(8)
-726 LoopStart LoopStart
-727 Dec Dec
-728 SubPtr(8) SubPtr(8)
-729 Inc Inc
-730 AddPtr(8) AddPtr(8)
-731 LoopStart LoopStart
-732 Dec Dec
-733 SubPtr(8) SubPtr(8)
-734 Dec Dec
-735 AddPtr(5) AddPtr(5)
-736 Inc Inc
-737 AddPtr(3) AddPtr(3)
-738 LoopStart LoopStart
-739 Dec Dec
-740 SubPtr(8) SubPtr(8)
-741 Inc Inc
-742 AddPtr(8) AddPtr(8)
-743 LoopStart LoopStart
-744 Dec Dec
-745 SubPtr(8) SubPtr(8)
-746 Dec Dec
-747 AddPtr(5) AddPtr(5)
-748 Inc Inc
-749 AddPtr(3) AddPtr(3)
-750 LoopStart LoopStart
-751 Dec Dec
-752 SubPtr(8) SubPtr(8)
-753 Inc Inc
-754 AddPtr(8) AddPtr(8)
-755 LoopStart LoopStart
-756 Dec Dec
-757 SubPtr(8) SubPtr(8)
-758 Dec Dec
-759 AddPtr(5) AddPtr(5)
-760 Inc Inc
-761 AddPtr(3) AddPtr(3)
-762 LoopStart LoopStart
-763 Dec Dec
-764 SubPtr(8) SubPtr(8)
-765 Inc Inc
-766 AddPtr(8) AddPtr(8)
-767 LoopStart LoopStart
-768 Dec Dec
-769 SubPtr(8) SubPtr(8)
-770 Dec Dec
-771 AddPtr(5) AddPtr(5)
-772 Inc Inc
-773 AddPtr(3) AddPtr(3)
-774 MoveLeft(8) MoveLeft(8)
-775 LoopEnd LoopEnd
-776 LoopEnd LoopEnd
-777 LoopEnd LoopEnd
-778 LoopEnd LoopEnd
-779 LoopEnd LoopEnd
-780 LoopEnd LoopEnd
-781 LoopEnd LoopEnd
-782 LoopEnd LoopEnd
-783 SubPtr(8) SubPtr(8)
-784 MoveRight(8) MoveRight(8)
-785 Dec Dec
-786 SubPtr(10) SubPtr(10)
-787 LoopEnd LoopEnd
-788 AddPtr(8) AddPtr(8)
-789 MoveLeft(13) MoveLeft(13)
-790 AddPtr(2) AddPtr(2)
-791 LoopStart LoopStart
-792 AddPtr(8) AddPtr(8)
-793 LoopStart LoopStart
-794 Dec Dec
-795 SubPtr(13) SubPtr(13)
-796 Add(5) Add(5)
-797 AddPtr(13) AddPtr(13)
-798 LoopEnd LoopEnd
-799 AddPtr(2) AddPtr(2)
-800 LoopEnd LoopEnd
-801 SubPtr(10) SubPtr(10)
-802 PtrMoveLeft(10) PtrMoveLeft(10)
-803 AddPtr(16) AddPtr(16)
-804 LoopEnd LoopEnd
-805 SubPtr(6) SubPtr(6)
-806 LoopStart LoopStart
-807 AddPtr(3) AddPtr(3)
-808 LoopStart LoopStart
-809 Dec Dec
-810 AddPtr(4) AddPtr(4)
-811 Inc Inc
-812 IncPtr IncPtr
-813 Inc Inc
-814 SubPtr(5) SubPtr(5)
-815 LoopEnd LoopEnd
-816 AddPtr(7) AddPtr(7)
-817 LoopEnd LoopEnd
-818 SubPtr(10) SubPtr(10)
-819 LoopStart LoopStart
-820 AddPtr(7) AddPtr(7)
-821 MoveLeft(4) MoveLeft(4)
-822 SubPtr(5) SubPtr(5)
-823 LoopStart LoopStart
-824 Dec Dec
-825 AddPtr(5) AddPtr(5)
-826 Inc Inc
-827 AddPtr(2) AddPtr(2)
-828 Inc Inc
-829 SubPtr(7) SubPtr(7)
-830 LoopEnd LoopEnd
-831 SubPtr(12) SubPtr(12)
-832 LoopEnd LoopEnd
-833 AddPtr(10) AddPtr(10)
-834 LoopStart LoopStart
-835 AddPtr(7) AddPtr(7)
-836 MoveLeft(5) MoveLeft(5)
-837 AddPtr(3) AddPtr(3)
-838 LoopEnd LoopEnd
-839 SubPtr(10) SubPtr(10)
-840 LoopStart LoopStart
-841 AddPtr(9) AddPtr(9)
-842 LoopStart LoopStart
-843 Dec Dec
-844 DecPtr DecPtr
-845 Dec Dec
-846 IncPtr IncPtr
-847 LoopEnd LoopEnd
-848 DecPtr DecPtr
-849 LoopStart LoopStart
-850 SubPtr(8) SubPtr(8)
-851 LoopStart LoopStart
-852 SubPtr(2) SubPtr(2)
-853 ZeroClear ZeroClear
-854 AddPtr(10) AddPtr(10)
-855 MoveLeft(10) MoveLeft(10)
-856 SubPtr(18) SubPtr(18)
-857 LoopEnd LoopEnd
-858 AddPtr(18) AddPtr(18)
-859 LoopEnd LoopEnd
-860 SubPtr(18) SubPtr(18)
-861 LoopEnd LoopEnd
-862 AddPtr(8) AddPtr(8)
-863 LoopStart LoopStart
-864 IncPtr IncPtr
-865 Dec Dec
-866 DecPtr DecPtr
-867 LoopStart LoopStart
-868 Inc Inc
-869 LoopStart LoopStart
-870 Inc Inc
-871 LoopStart LoopStart
-872 Inc Inc
-873 LoopStart LoopStart
-874 Inc Inc
-875 LoopStart LoopStart
-876 Inc Inc
-877 LoopStart LoopStart
-878 Inc Inc
-879 LoopStart LoopStart
-880 Inc Inc
-881 LoopStart LoopStart
-882 Inc Inc
-883 LoopStart LoopStart
-884 Inc Inc
-885 LoopStart LoopStart
-886 ZeroClear ZeroClear
-887 IncPtr IncPtr
-888 Inc Inc
-889 DecPtr DecPtr
-890 LoopEnd LoopEnd
-891 LoopEnd LoopEnd
-892 LoopEnd LoopEnd
-893 LoopEnd LoopEnd
-894 LoopEnd LoopEnd
-895 LoopEnd LoopEnd
-896 LoopEnd LoopEnd
-897 LoopEnd LoopEnd
-898 LoopEnd LoopEnd
-899 LoopEnd LoopEnd
-900 LoopEnd LoopEnd
-901 IncPtr IncPtr
-902 Inc Inc
-903 LoopStart LoopStart
-904 ZeroClear ZeroClear
-905 DecPtr DecPtr
-906 ZeroClear ZeroClear
-907 Inc Inc
-908 AddPtr(4) AddPtr(4)
-909 Inc Inc
-910 AddPtr(8) AddPtr(8)
-911 PtrMoveRight(10) PtrMoveRight(10)
-912 SubPtr(10) SubPtr(10)
-913 LoopStart LoopStart
-914 SubPtr(6) SubPtr(6)
-915 LoopStart LoopStart
-916 SubPtr(4) SubPtr(4)
-917 PtrMoveLeft(10) PtrMoveLeft(10)
-918 AddPtr(4) AddPtr(4)
-919 Inc Inc
-920 SubPtr(10) SubPtr(10)
-921 LoopEnd LoopEnd
-922 SubPtr(4) SubPtr(4)
-923 LoopEnd LoopEnd
-924 AddPtr(20) AddPtr(20)
-925 PtrMoveRight(10) PtrMoveRight(10)
-926 SubPtr(10) SubPtr(10)
-927 PtrMoveLeft(10) PtrMoveLeft(10)
-928 AddPtr(4) AddPtr(4)
-929 Dec Dec
-930 LoopStart LoopStart
-931 ZeroClear ZeroClear
-932 AddPtr(8) AddPtr(8)
-933 Dec Dec
-934 SubPtr(2) SubPtr(2)
-935 LoopStart LoopStart
-936 IncPtr IncPtr
-937 ZeroClear ZeroClear
-938 AddPtr(2) AddPtr(2)
-939 MoveLeft(2) MoveLeft(2)
-940 AddPtr(7) AddPtr(7)
-941 LoopEnd LoopEnd
-942 SubPtr(10) SubPtr(10)
-943 LoopStart LoopStart
-944 Inc Inc
-945 AddPtr(2) AddPtr(2)
-946 LoopStart LoopStart
-947 AddPtr(8) AddPtr(8)
-948 Inc Inc
-949 AddPtr(2) AddPtr(2)
-950 LoopEnd LoopEnd
-951 SubPtr(2) SubPtr(2)
-952 Dec Dec
-953 SubPtr(10) SubPtr(10)
-954 LoopEnd LoopEnd
-955 Dec Dec
-956 LoopStart LoopStart
-957 AddPtr(2) AddPtr(2)
-958 Add(48) Add(48)
-959 Write Write
-960 Sub(48) Sub(48)
-961 SubPtr(12) SubPtr(12)
-962 LoopEnd LoopEnd
-963 Add(32) Add(32)
-964 Write Write
-965 ZeroClear ZeroClear
-966 AddPtr(4) AddPtr(4)
-967 LoopEnd LoopEnd
-968 AddPtr(6) AddPtr(6)
-969 LoopStart LoopStart
-970 AddPtr(2) AddPtr(2)
-971 LoopStart LoopStart
-972 Dec Dec
-973 AddPtr(5) AddPtr(5)
-974 Inc Inc
-975 SubPtr(5) SubPtr(5)
-976 LoopStart LoopStart
-977 Dec Dec
-978 AddPtr(5) AddPtr(5)
-979 Inc Inc
-980 SubPtr(5) SubPtr(5)
-981 LoopStart LoopStart
-982 Dec Dec
-983 AddPtr(5) AddPtr(5)
-984 Inc Inc
-985 SubPtr(5) SubPtr(5)
-986 LoopStart LoopStart
-987 Dec Dec
-988 AddPtr(5) AddPtr(5)
-989 Inc Inc
-990 SubPtr(5) SubPtr(5)
-991 LoopStart LoopStart
-992 Dec Dec
-993 AddPtr(5) AddPtr(5)
-994 Inc Inc
-995 SubPtr(5) SubPtr(5)
-996 LoopStart LoopStart
-997 Dec Dec
-998 AddPtr(5) AddPtr(5)
-999 Inc Inc
-1000 SubPtr(5) SubPtr(5)
-1001 LoopStart LoopStart
-1002 Dec Dec
-1003 AddPtr(5) AddPtr(5)
-1004 Inc Inc
-1005 SubPtr(5) SubPtr(5)
-1006 LoopStart LoopStart
-1007 Dec Dec
-1008 AddPtr(5) AddPtr(5)
-1009 Inc Inc
-1010 SubPtr(5) SubPtr(5)
-1011 LoopStart LoopStart
-1012 Dec Dec
-1013 AddPtr(5) AddPtr(5)
-1014 Inc Inc
-1015 SubPtr(5) SubPtr(5)
-1016 LoopStart LoopStart
-1017 Dec Dec
-1018 AddPtr(5) AddPtr(5)
-1019 Sub(9) Sub(9)
-1020 AddPtr(5) AddPtr(5)
-1021 Inc Inc
-1022 SubPtr(10) SubPtr(10)
-1023 MoveRight(5) MoveRight(5)
-1024 LoopEnd LoopEnd
-1025 LoopEnd LoopEnd
-1026 LoopEnd LoopEnd
-1027 LoopEnd LoopEnd
-1028 LoopEnd LoopEnd
-1029 LoopEnd LoopEnd
-1030 LoopEnd LoopEnd
-1031 LoopEnd LoopEnd
-1032 LoopEnd LoopEnd
-1033 LoopEnd LoopEnd
-1034 AddPtr(8) AddPtr(8)
-1035 LoopEnd LoopEnd
-1036 SubPtr(10) SubPtr(10)
-1037 LoopStart LoopStart
-1038 AddPtr(7) AddPtr(7)
-1039 MoveLeft(5) MoveLeft(5)
-1040 SubPtr(17) SubPtr(17)
-1041 LoopEnd LoopEnd
-1042 AddPtr(9) AddPtr(9)
-1043 LoopEnd LoopEnd
-1044 DecPtr DecPtr
-1045 LoopEnd JNZ(56)
-1046 AddPtr(2) AddPtr(2)
-1047 PtrMoveRight(10) PtrMoveRight(10)
-1048 SubPtr(10) SubPtr(10)
-1049 LoopStart JZ(1060)
-1050 Inc Inc
-1051 IncPtr IncPtr
-1052 LoopStart LoopStart
-1053 AddPtr(9) AddPtr(9)
-1054 Inc Inc
-1055 IncPtr IncPtr
-1056 LoopEnd LoopEnd
-1057 DecPtr DecPtr
-1058 Dec Dec
-1059 SubPtr(10) SubPtr(10)
-1060 LoopEnd JNZ(1049)
-1061 Dec Dec
-1062 LoopStart JZ(1067)
-1063 IncPtr IncPtr
-1064 Add(48) Add(48)
-1065 Write Write
-1066 SubPtr(11) SubPtr(11)
-1067 LoopEnd JNZ(1062)
-1068 Add(10) Add(10)
-1069 Write Write
+0 JZ(1)
+1 Jnz(0)
+2 AddPtr(30)
+3 Dec
+4 SubPtr(9)
+5 Inc
+6 JZ(18)
+7 Dec
+8 PtrMoveRight(10)
+9 ZeroClear
+10 SubPtr(10)
+11 JZ(14)
+12 MovingAdd(Right, 10, Plus, 1)
+13 SubPtr(10)
+14 Jnz(11)
+15 AddPtr(10)
+16 Read
+17 Sub(10)
+18 Jnz(6)
+19 AddPtr(10)
+20 JZ(25)
+21 Sub(37)
+22 AddPtr(9)
+23 Dec
+24 IncPtr
+25 Jnz(20)
+26 DecPtr
+27 JZ(38)
+28 Inc
+29 IncPtr
+30 JZ(34)
+31 AddPtr(9)
+32 Inc
+33 IncPtr
+34 Jnz(30)
+35 DecPtr
+36 Dec
+37 SubPtr(10)
+38 Jnz(27)
+39 Dec
+40 JZ(46)
+41 IncPtr
+42 Add(48)
+43 Write
+44 Sub(48)
+45 SubPtr(11)
+46 Jnz(40)
+47 Add(58)
+48 Write
+49 Sub(26)
+50 Write
+51 ZeroClear
+52 AddPtr(12)
+53 Add(2)
+54 SubPtr(4)
+55 Inc
+56 JZ(995)
+57 ZeroClear
+58 AddPtr(2)
+59 JZ(82)
+60 AddPtr(4)
+61 ZeroClear
+62 IncPtr
+63 ZeroClear
+64 IncPtr
+65 ZeroClear
+66 IncPtr
+67 ZeroClear
+68 IncPtr
+69 ZeroClear
+70 IncPtr
+71 ZeroClear
+72 SubPtr(7)
+73 JZ(80)
+74 Dec
+75 AddPtr(3)
+76 Inc
+77 IncPtr
+78 Inc
+79 SubPtr(4)
+80 Jnz(73)
+81 AddPtr(8)
+82 Jnz(59)
+83 SubPtr(10)
+84 JZ(88)
+85 AddPtr(6)
+86 MovingAdd(Left, 4, Plus, 1)
+87 SubPtr(16)
+88 Jnz(84)
+89 AddPtr(10)
+90 JZ(101)
+91 IncPtr
+92 JZ(99)
+93 Dec
+94 AddPtr(3)
+95 Inc
+96 AddPtr(2)
+97 Inc
+98 SubPtr(5)
+99 Jnz(92)
+100 AddPtr(9)
+101 Jnz(90)
+102 SubPtr(10)
+103 JZ(107)
+104 AddPtr(6)
+105 MovingAdd(Left, 5, Plus, 1)
+106 SubPtr(16)
+107 Jnz(103)
+108 AddPtr(10)
+109 JZ(117)
+110 AddPtr(3)
+111 ZeroClear
+112 AddPtr(3)
+113 ZeroClear
+114 IncPtr
+115 ZeroClear
+116 AddPtr(3)
+117 Jnz(109)
+118 SubPtr(10)
+119 PtrMoveLeft(10)
+120 AddPtr(9)
+121 ZeroClear
+122 AddPtr(7)
+123 Inc
+124 SubPtr(8)
+125 ZeroClear
+126 Inc
+127 JZ(369)
+128 Dec
+129 AddPtr(2)
+130 JZ(134)
+131 AddPtr(6)
+132 MovingAdd(Right, 1, Plus, 2)
+133 AddPtr(4)
+134 Jnz(130)
+135 SubPtr(10)
+136 JZ(144)
+137 AddPtr(8)
+138 ZeroClear
+139 IncPtr
+140 ZeroClear
+141 SubPtr(4)
+142 MovingAdd(Right, 3, Plus, 2)
+143 SubPtr(15)
+144 Jnz(136)
+145 AddPtr(10)
+146 JZ(212)
+147 AddPtr(8)
+148 JZ(210)
+149 Dec
+150 IncPtr
+151 Inc
+152 DecPtr
+153 JZ(209)
+154 Dec
+155 IncPtr
+156 Inc
+157 DecPtr
+158 JZ(208)
+159 Dec
+160 IncPtr
+161 Inc
+162 DecPtr
+163 JZ(207)
+164 Dec
+165 IncPtr
+166 Inc
+167 DecPtr
+168 JZ(206)
+169 Dec
+170 IncPtr
+171 Inc
+172 DecPtr
+173 JZ(205)
+174 Dec
+175 IncPtr
+176 Inc
+177 DecPtr
+178 JZ(204)
+179 Dec
+180 IncPtr
+181 Inc
+182 DecPtr
+183 JZ(203)
+184 Dec
+185 IncPtr
+186 Inc
+187 DecPtr
+188 JZ(202)
+189 Dec
+190 IncPtr
+191 Inc
+192 DecPtr
+193 JZ(201)
+194 Dec
+195 IncPtr
+196 Sub(9)
+197 AddPtr(9)
+198 Inc
+199 SubPtr(10)
+200 MovingAdd(Right, 1, Plus, 1)
+201 Jnz(193)
+202 Jnz(188)
+203 Jnz(183)
+204 Jnz(178)
+205 Jnz(173)
+206 Jnz(168)
+207 Jnz(163)
+208 Jnz(158)
+209 Jnz(153)
+210 Jnz(148)
+211 AddPtr(2)
+212 Jnz(146)
+213 SubPtr(10)
+214 JZ(225)
+215 AddPtr(9)
+216 JZ(223)
+217 Dec
+218 DecPtr
+219 Inc
+220 SubPtr(3)
+221 Inc
+222 AddPtr(4)
+223 Jnz(216)
+224 SubPtr(19)
+225 Jnz(214)
+226 AddPtr(10)
+227 JZ(293)
+228 AddPtr(7)
+229 JZ(291)
+230 Dec
+231 DecPtr
+232 Inc
+233 IncPtr
+234 JZ(290)
+235 Dec
+236 DecPtr
+237 Inc
+238 IncPtr
+239 JZ(289)
+240 Dec
+241 DecPtr
+242 Inc
+243 IncPtr
+244 JZ(288)
+245 Dec
+246 DecPtr
+247 Inc
+248 IncPtr
+249 JZ(287)
+250 Dec
+251 DecPtr
+252 Inc
+253 IncPtr
+254 JZ(286)
+255 Dec
+256 DecPtr
+257 Inc
+258 IncPtr
+259 JZ(285)
+260 Dec
+261 DecPtr
+262 Inc
+263 IncPtr
+264 JZ(284)
+265 Dec
+266 DecPtr
+267 Inc
+268 IncPtr
+269 JZ(283)
+270 Dec
+271 DecPtr
+272 Inc
+273 IncPtr
+274 JZ(282)
+275 Dec
+276 DecPtr
+277 Sub(9)
+278 AddPtr(11)
+279 Inc
+280 SubPtr(10)
+281 MovingAdd(Left, 1, Plus, 1)
+282 Jnz(274)
+283 Jnz(269)
+284 Jnz(264)
+285 Jnz(259)
+286 Jnz(254)
+287 Jnz(249)
+288 Jnz(244)
+289 Jnz(239)
+290 Jnz(234)
+291 Jnz(229)
+292 AddPtr(3)
+293 Jnz(227)
+294 SubPtr(10)
+295 JZ(306)
+296 AddPtr(4)
+297 JZ(304)
+298 Dec
+299 AddPtr(3)
+300 Inc
+301 AddPtr(2)
+302 Inc
+303 SubPtr(5)
+304 Jnz(297)
+305 SubPtr(14)
+306 Jnz(295)
+307 AddPtr(10)
+308 JZ(312)
+309 AddPtr(7)
+310 MovingAdd(Left, 3, Plus, 1)
+311 AddPtr(3)
+312 Jnz(308)
+313 SubPtr(10)
+314 JZ(330)
+315 AddPtr(8)
+316 MovingAdd(Right, 1, Minus, 1)
+317 IncPtr
+318 JZ(328)
+319 SubPtr(9)
+320 JZ(326)
+321 DecPtr
+322 ZeroClear
+323 AddPtr(10)
+324 MovingAdd(Left, 10, Plus, 1)
+325 SubPtr(19)
+326 Jnz(320)
+327 AddPtr(19)
+328 Jnz(318)
+329 SubPtr(19)
+330 Jnz(314)
+331 AddPtr(9)
+332 JZ(367)
+333 Inc
+334 JZ(366)
+335 Inc
+336 JZ(365)
+337 Inc
+338 JZ(364)
+339 Inc
+340 JZ(363)
+341 Inc
+342 JZ(362)
+343 Inc
+344 JZ(361)
+345 Inc
+346 JZ(360)
+347 Inc
+348 JZ(359)
+349 Inc
+350 JZ(358)
+351 Inc
+352 JZ(357)
+353 ZeroClear
+354 DecPtr
+355 Inc
+356 IncPtr
+357 Jnz(352)
+358 Jnz(350)
+359 Jnz(348)
+360 Jnz(346)
+361 Jnz(344)
+362 Jnz(342)
+363 Jnz(340)
+364 Jnz(338)
+365 Jnz(336)
+366 Jnz(334)
+367 Jnz(332)
+368 DecPtr
+369 Jnz(127)
+370 AddPtr(8)
+371 JZ(759)
+372 SubPtr(6)
+373 JZ(388)
+374 AddPtr(8)
+375 ZeroClear
+376 IncPtr
+377 ZeroClear
+378 SubPtr(5)
+379 JZ(386)
+380 Dec
+381 AddPtr(3)
+382 Inc
+383 IncPtr
+384 Inc
+385 SubPtr(4)
+386 Jnz(379)
+387 AddPtr(6)
+388 Jnz(373)
+389 SubPtr(10)
+390 JZ(403)
+391 AddPtr(8)
+392 MovingAdd(Left, 4, Plus, 1)
+393 SubPtr(3)
+394 JZ(401)
+395 Dec
+396 AddPtr(3)
+397 Inc
+398 IncPtr
+399 Inc
+400 SubPtr(4)
+401 Jnz(394)
+402 SubPtr(15)
+403 Jnz(390)
+404 AddPtr(10)
+405 JZ(409)
+406 AddPtr(9)
+407 MovingAdd(Left, 4, Plus, 1)
+408 IncPtr
+409 Jnz(405)
+410 SubPtr(10)
+411 JZ(415)
+412 AddPtr(8)
+413 MovingAdd(Left, 1, Minus, 1)
+414 SubPtr(18)
+415 Jnz(411)
+416 AddPtr(10)
+417 JZ(492)
+418 AddPtr(7)
+419 JZ(490)
+420 Dec
+421 IncPtr
+422 Inc
+423 DecPtr
+424 JZ(489)
+425 Dec
+426 IncPtr
+427 Inc
+428 DecPtr
+429 JZ(488)
+430 Dec
+431 IncPtr
+432 Inc
+433 DecPtr
+434 JZ(487)
+435 Dec
+436 IncPtr
+437 Inc
+438 DecPtr
+439 JZ(486)
+440 Dec
+441 IncPtr
+442 Inc
+443 DecPtr
+444 JZ(485)
+445 Dec
+446 IncPtr
+447 Inc
+448 DecPtr
+449 JZ(484)
+450 Dec
+451 IncPtr
+452 Inc
+453 DecPtr
+454 JZ(483)
+455 Dec
+456 IncPtr
+457 Inc
+458 DecPtr
+459 JZ(482)
+460 Dec
+461 IncPtr
+462 Inc
+463 DecPtr
+464 JZ(481)
+465 Dec
+466 IncPtr
+467 Inc
+468 DecPtr
+469 JZ(480)
+470 Add(10)
+471 JZ(476)
+472 Inc
+473 IncPtr
+474 Dec
+475 DecPtr
+476 Jnz(471)
+477 AddPtr(10)
+478 Dec
+479 SubPtr(10)
+480 Jnz(469)
+481 Jnz(464)
+482 Jnz(459)
+483 Jnz(454)
+484 Jnz(449)
+485 Jnz(444)
+486 Jnz(439)
+487 Jnz(434)
+488 Jnz(429)
+489 Jnz(424)
+490 Jnz(419)
+491 AddPtr(3)
+492 Jnz(417)
+493 AddPtr(7)
+494 Inc
+495 JZ(595)
+496 ZeroClear
+497 SubPtr(17)
+498 JZ(506)
+499 AddPtr(4)
+500 ZeroClear
+501 AddPtr(4)
+502 MovingAdd(Left, 4, Plus, 1)
+503 SubPtr(2)
+504 MovingAdd(Right, 2, Plus, 1)
+505 SubPtr(16)
+506 Jnz(498)
+507 AddPtr(10)
+508 JZ(519)
+509 AddPtr(8)
+510 JZ(517)
+511 Dec
+512 IncPtr
+513 Inc
+514 SubPtr(3)
+515 Inc
+516 AddPtr(2)
+517 Jnz(510)
+518 AddPtr(2)
+519 Jnz(508)
+520 SubPtr(10)
+521 JZ(525)
+522 AddPtr(3)
+523 MovingAdd(Right, 6, Plus, 1)
+524 SubPtr(13)
+525 Jnz(521)
+526 AddPtr(10)
+527 JZ(593)
+528 AddPtr(9)
+529 JZ(591)
+530 Dec
+531 SubPtr(6)
+532 Inc
+533 AddPtr(6)
+534 JZ(590)
+535 Dec
+536 SubPtr(6)
+537 Inc
+538 AddPtr(6)
+539 JZ(589)
+540 Dec
+541 SubPtr(6)
+542 Inc
+543 AddPtr(6)
+544 JZ(588)
+545 Dec
+546 SubPtr(6)
+547 Inc
+548 AddPtr(6)
+549 JZ(587)
+550 Dec
+551 SubPtr(6)
+552 Inc
+553 AddPtr(6)
+554 JZ(586)
+555 Dec
+556 SubPtr(6)
+557 Inc
+558 AddPtr(6)
+559 JZ(585)
+560 Dec
+561 SubPtr(6)
+562 Inc
+563 AddPtr(6)
+564 JZ(584)
+565 Dec
+566 SubPtr(6)
+567 Inc
+568 AddPtr(6)
+569 JZ(583)
+570 Dec
+571 SubPtr(6)
+572 Inc
+573 AddPtr(6)
+574 JZ(582)
+575 Dec
+576 SubPtr(6)
+577 Sub(9)
+578 AddPtr(16)
+579 Inc
+580 SubPtr(10)
+581 MovingAdd(Left, 6, Plus, 1)
+582 Jnz(574)
+583 Jnz(569)
+584 Jnz(564)
+585 Jnz(559)
+586 Jnz(554)
+587 Jnz(549)
+588 Jnz(544)
+589 Jnz(539)
+590 Jnz(534)
+591 Jnz(529)
+592 IncPtr
+593 Jnz(527)
+594 AddPtr(7)
+595 Jnz(495)
+596 SubPtr(17)
+597 PtrMoveLeft(10)
+598 AddPtr(10)
+599 JZ(607)
+600 AddPtr(8)
+601 ZeroClear
+602 SubPtr(2)
+603 MovingAdd(Right, 1, Plus, 1)
+604 DecPtr
+605 MovingAdd(Right, 3, Plus, 1)
+606 AddPtr(5)
+607 Jnz(599)
+608 SubPtr(10)
+609 JZ(673)
+610 Inc
+611 AddPtr(7)
+612 JZ(668)
+613 Dec
+614 SubPtr(7)
+615 Inc
+616 AddPtr(7)
+617 JZ(667)
+618 Dec
+619 SubPtr(7)
+620 Dec
+621 AddPtr(6)
+622 Inc
+623 IncPtr
+624 JZ(666)
+625 Dec
+626 SubPtr(7)
+627 Inc
+628 AddPtr(7)
+629 JZ(665)
+630 Dec
+631 SubPtr(7)
+632 Dec
+633 AddPtr(6)
+634 Inc
+635 IncPtr
+636 JZ(664)
+637 Dec
+638 SubPtr(7)
+639 Inc
+640 AddPtr(7)
+641 JZ(663)
+642 Dec
+643 SubPtr(7)
+644 Dec
+645 AddPtr(6)
+646 Inc
+647 IncPtr
+648 JZ(662)
+649 Dec
+650 SubPtr(7)
+651 Inc
+652 AddPtr(7)
+653 JZ(661)
+654 Dec
+655 SubPtr(7)
+656 Dec
+657 AddPtr(6)
+658 Inc
+659 IncPtr
+660 MovingAdd(Left, 7, Plus, 1)
+661 Jnz(653)
+662 Jnz(648)
+663 Jnz(641)
+664 Jnz(636)
+665 Jnz(629)
+666 Jnz(624)
+667 Jnz(617)
+668 Jnz(612)
+669 SubPtr(7)
+670 MovingAdd(Right, 7, Plus, 1)
+671 Dec
+672 SubPtr(10)
+673 Jnz(609)
+674 AddPtr(7)
+675 MovingAdd(Left, 11, Plus, 1)
+676 AddPtr(3)
+677 JZ(681)
+678 AddPtr(7)
+679 MovingAdd(Left, 11, Plus, 5)
+680 AddPtr(3)
+681 Jnz(677)
+682 SubPtr(10)
+683 JZ(747)
+684 Inc
+685 AddPtr(8)
+686 JZ(742)
+687 Dec
+688 SubPtr(8)
+689 Inc
+690 AddPtr(8)
+691 JZ(741)
+692 Dec
+693 SubPtr(8)
+694 Dec
+695 AddPtr(5)
+696 Inc
+697 AddPtr(3)
+698 JZ(740)
+699 Dec
+700 SubPtr(8)
+701 Inc
+702 AddPtr(8)
+703 JZ(739)
+704 Dec
+705 SubPtr(8)
+706 Dec
+707 AddPtr(5)
+708 Inc
+709 AddPtr(3)
+710 JZ(738)
+711 Dec
+712 SubPtr(8)
+713 Inc
+714 AddPtr(8)
+715 JZ(737)
+716 Dec
+717 SubPtr(8)
+718 Dec
+719 AddPtr(5)
+720 Inc
+721 AddPtr(3)
+722 JZ(736)
+723 Dec
+724 SubPtr(8)
+725 Inc
+726 AddPtr(8)
+727 JZ(735)
+728 Dec
+729 SubPtr(8)
+730 Dec
+731 AddPtr(5)
+732 Inc
+733 AddPtr(3)
+734 MovingAdd(Left, 8, Plus, 1)
+735 Jnz(727)
+736 Jnz(722)
+737 Jnz(715)
+738 Jnz(710)
+739 Jnz(703)
+740 Jnz(698)
+741 Jnz(691)
+742 Jnz(686)
+743 SubPtr(8)
+744 MovingAdd(Right, 8, Plus, 1)
+745 Dec
+746 SubPtr(10)
+747 Jnz(683)
+748 AddPtr(8)
+749 MovingAdd(Left, 13, Plus, 1)
+750 AddPtr(2)
+751 JZ(755)
+752 AddPtr(8)
+753 MovingAdd(Left, 13, Plus, 5)
+754 AddPtr(2)
+755 Jnz(751)
+756 SubPtr(10)
+757 PtrMoveLeft(10)
+758 AddPtr(16)
+759 Jnz(371)
+760 SubPtr(6)
+761 JZ(772)
+762 AddPtr(3)
+763 JZ(770)
+764 Dec
+765 AddPtr(4)
+766 Inc
+767 IncPtr
+768 Inc
+769 SubPtr(5)
+770 Jnz(763)
+771 AddPtr(7)
+772 Jnz(761)
+773 SubPtr(10)
+774 JZ(787)
+775 AddPtr(7)
+776 MovingAdd(Left, 4, Plus, 1)
+777 SubPtr(5)
+778 JZ(785)
+779 Dec
+780 AddPtr(5)
+781 Inc
+782 AddPtr(2)
+783 Inc
+784 SubPtr(7)
+785 Jnz(778)
+786 SubPtr(12)
+787 Jnz(774)
+788 AddPtr(10)
+789 JZ(793)
+790 AddPtr(7)
+791 MovingAdd(Left, 5, Plus, 1)
+792 AddPtr(3)
+793 Jnz(789)
+794 SubPtr(10)
+795 JZ(811)
+796 AddPtr(9)
+797 MovingAdd(Left, 1, Minus, 1)
+798 DecPtr
+799 JZ(809)
+800 SubPtr(8)
+801 JZ(807)
+802 SubPtr(2)
+803 ZeroClear
+804 AddPtr(10)
+805 MovingAdd(Left, 10, Plus, 1)
+806 SubPtr(18)
+807 Jnz(801)
+808 AddPtr(18)
+809 Jnz(799)
+810 SubPtr(18)
+811 Jnz(795)
+812 AddPtr(8)
+813 JZ(850)
+814 IncPtr
+815 Dec
+816 DecPtr
+817 JZ(849)
+818 Inc
+819 JZ(848)
+820 Inc
+821 JZ(847)
+822 Inc
+823 JZ(846)
+824 Inc
+825 JZ(845)
+826 Inc
+827 JZ(844)
+828 Inc
+829 JZ(843)
+830 Inc
+831 JZ(842)
+832 Inc
+833 JZ(841)
+834 Inc
+835 JZ(840)
+836 ZeroClear
+837 IncPtr
+838 Inc
+839 DecPtr
+840 Jnz(835)
+841 Jnz(833)
+842 Jnz(831)
+843 Jnz(829)
+844 Jnz(827)
+845 Jnz(825)
+846 Jnz(823)
+847 Jnz(821)
+848 Jnz(819)
+849 Jnz(817)
+850 Jnz(813)
+851 IncPtr
+852 Inc
+853 JZ(993)
+854 ZeroClear
+855 DecPtr
+856 ZeroClear
+857 Inc
+858 AddPtr(4)
+859 Inc
+860 AddPtr(8)
+861 PtrMoveRight(10)
+862 SubPtr(10)
+863 JZ(873)
+864 SubPtr(6)
+865 JZ(871)
+866 SubPtr(4)
+867 PtrMoveLeft(10)
+868 AddPtr(4)
+869 Inc
+870 SubPtr(10)
+871 Jnz(865)
+872 SubPtr(4)
+873 Jnz(863)
+874 AddPtr(20)
+875 PtrMoveRight(10)
+876 SubPtr(10)
+877 PtrMoveLeft(10)
+878 AddPtr(4)
+879 Dec
+880 JZ(917)
+881 ZeroClear
+882 AddPtr(8)
+883 Dec
+884 SubPtr(2)
+885 JZ(891)
+886 IncPtr
+887 ZeroClear
+888 AddPtr(2)
+889 MovingAdd(Left, 2, Plus, 1)
+890 AddPtr(7)
+891 Jnz(885)
+892 SubPtr(10)
+893 JZ(904)
+894 Inc
+895 AddPtr(2)
+896 JZ(900)
+897 AddPtr(8)
+898 Inc
+899 AddPtr(2)
+900 Jnz(896)
+901 SubPtr(2)
+902 Dec
+903 SubPtr(10)
+904 Jnz(893)
+905 Dec
+906 JZ(912)
+907 AddPtr(2)
+908 Add(48)
+909 Write
+910 Sub(48)
+911 SubPtr(12)
+912 Jnz(906)
+913 Add(32)
+914 Write
+915 ZeroClear
+916 AddPtr(4)
+917 Jnz(880)
+918 AddPtr(6)
+919 JZ(985)
+920 AddPtr(2)
+921 JZ(983)
+922 Dec
+923 AddPtr(5)
+924 Inc
+925 SubPtr(5)
+926 JZ(982)
+927 Dec
+928 AddPtr(5)
+929 Inc
+930 SubPtr(5)
+931 JZ(981)
+932 Dec
+933 AddPtr(5)
+934 Inc
+935 SubPtr(5)
+936 JZ(980)
+937 Dec
+938 AddPtr(5)
+939 Inc
+940 SubPtr(5)
+941 JZ(979)
+942 Dec
+943 AddPtr(5)
+944 Inc
+945 SubPtr(5)
+946 JZ(978)
+947 Dec
+948 AddPtr(5)
+949 Inc
+950 SubPtr(5)
+951 JZ(977)
+952 Dec
+953 AddPtr(5)
+954 Inc
+955 SubPtr(5)
+956 JZ(976)
+957 Dec
+958 AddPtr(5)
+959 Inc
+960 SubPtr(5)
+961 JZ(975)
+962 Dec
+963 AddPtr(5)
+964 Inc
+965 SubPtr(5)
+966 JZ(974)
+967 Dec
+968 AddPtr(5)
+969 Sub(9)
+970 AddPtr(5)
+971 Inc
+972 SubPtr(10)
+973 MovingAdd(Right, 5, Plus, 1)
+974 Jnz(966)
+975 Jnz(961)
+976 Jnz(956)
+977 Jnz(951)
+978 Jnz(946)
+979 Jnz(941)
+980 Jnz(936)
+981 Jnz(931)
+982 Jnz(926)
+983 Jnz(921)
+984 AddPtr(8)
+985 Jnz(919)
+986 SubPtr(10)
+987 JZ(991)
+988 AddPtr(7)
+989 MovingAdd(Left, 5, Plus, 1)
+990 SubPtr(17)
+991 Jnz(987)
+992 AddPtr(9)
+993 Jnz(853)
+994 DecPtr
+995 Jnz(56)
+996 AddPtr(2)
+997 PtrMoveRight(10)
+998 SubPtr(10)
+999 JZ(1010)
+1000 Inc
+1001 IncPtr
+1002 JZ(1006)
+1003 AddPtr(9)
+1004 Inc
+1005 IncPtr
+1006 Jnz(1002)
+1007 DecPtr
+1008 Dec
+1009 SubPtr(10)
+1010 Jnz(999)
+1011 Dec
+1012 JZ(1017)
+1013 IncPtr
+1014 Add(48)
+1015 Write
+1016 SubPtr(11)
+1017 Jnz(1012)
+1018 Add(10)
+1019 Write

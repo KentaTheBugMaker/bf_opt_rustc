@@ -7,11 +7,14 @@ use crate::optimizer::OptLevel;
 use crate::parser::src_to_ir;
 use std::time::Instant;
 extern crate test;
+mod bf2rustc;
 mod interpreter;
+mod optimized_rust_code_factor;
 mod optimizer;
 mod parser;
 
 fn main() {
+
     let code = include_str!("../factor.b");
     let bf_ir = src_to_ir(code);
     let opt_ir_inc_dec2 = optimizer::optimize(&bf_ir, OptLevel::IncDecOpt2);
@@ -19,19 +22,20 @@ fn main() {
     let opt_ir_move_ptr = optimizer::optimize(&bf_ir, OptLevel::LoopPtrMove);
     let opt_ir_data_move = optimizer::optimize(&bf_ir, OptLevel::LoopDataMove);
     let opt_ir_jump_opt = optimizer::optimize(&bf_ir, OptLevel::JumpOpt);
-    for (i, (o_move, o_jump)) in opt_ir_data_move
-        .iter()
-        .zip(opt_ir_jump_opt.iter())
+    /*
+    for (i,  o_jump) in opt_ir_jump_opt.iter()
         .enumerate()
     {
-        println!("{} {:?} {:?}", i, o_move, o_jump);
+        println!("{} {:?}", i,  o_jump);
     }
+*/
     let writer = std::io::stdout();
-
     let mut bench_data = include_str!("../bench_number.txt").to_ascii_lowercase();
     bench_data = bench_data.replace("\r\n", "\n");
     let bench_data = bench_data.as_bytes();
     println!("input bytes {:?}", bench_data);
+    let rust_code= bf2rustc::emit_rust_code(&opt_ir_jump_opt);
+    println!("{}",rust_code);
     let mut vm = interpreter::Interpreter::load_program(bf_ir, bench_data, writer);
     let instant = Instant::now();
     vm.exec_program();
@@ -61,6 +65,11 @@ fn main() {
     optimizer::exec_opt_ir(opt_ir_jump_opt, bench_data, writer, false);
     let jump_opt = instant.elapsed();
     println!("jump_opt interpreter elapsed {:?}", jump_opt);
+
+    let writer = std::io::stdout();
+    let instant = Instant::now();
+    optimized_rust_code_factor::bf_main(bench_data, writer);
+    println!("native code elapsed {:?}", instant.elapsed())
 }
 
 #[cfg(test)]
