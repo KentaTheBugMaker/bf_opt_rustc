@@ -61,49 +61,45 @@ impl<R: Read, W: Write> Interpreter<R, W> {
                         .unwrap();
                 }
                 BFInstruction::LoopStart => {
-                    if self.mem[self.data_ptr]==0{
-                        let mut bracket_nesting=1;
-                        let saved_pc=self.instruction_ptr;
-                        while bracket_nesting>0 {
-                            self.instruction_ptr+=1;
-                            if let Some(instruction)= self.program.get(self.instruction_ptr){
-                                match instruction  {
-                                    BFInstruction::LoopEnd=>{
-                                        bracket_nesting-=1;
+                    if self.mem[self.data_ptr] == 0 {
+                        let mut bracket_nesting = 1;
+                        let saved_pc = self.instruction_ptr;
+                        while bracket_nesting > 0 {
+                            self.instruction_ptr += 1;
+                            if let Some(instruction) = self.program.get(self.instruction_ptr) {
+                                match instruction {
+                                    BFInstruction::LoopEnd => {
+                                        bracket_nesting -= 1;
                                     }
-                                    BFInstruction::LoopStart=>{
-                                        bracket_nesting+=1;
+                                    BFInstruction::LoopStart => {
+                                        bracket_nesting += 1;
                                     }
-                                    _=>{
-
-                                    }
+                                    _ => {}
                                 }
-                            }else{
-                                eprintln!("unmatched [ at pc= {}",saved_pc);
+                            } else {
+                                eprintln!("unmatched [ at pc= {}", saved_pc);
                             }
                         }
                     }
                 }
                 BFInstruction::LoopEnd => {
-                    if self.mem[self.data_ptr]!=0{
-                        let mut bracket_nesting=1;
-                        let saved_pc=self.instruction_ptr;
-                        while bracket_nesting>0 {
-                            self.instruction_ptr-=1;
-                            if let Some(instruction)= self.program.get(self.instruction_ptr){
-                                match instruction  {
-                                    BFInstruction::LoopStart=>{
-                                        bracket_nesting-=1;
+                    if self.mem[self.data_ptr] != 0 {
+                        let mut bracket_nesting = 1;
+                        let saved_pc = self.instruction_ptr;
+                        while bracket_nesting > 0 {
+                            self.instruction_ptr -= 1;
+                            if let Some(instruction) = self.program.get(self.instruction_ptr) {
+                                match instruction {
+                                    BFInstruction::LoopStart => {
+                                        bracket_nesting -= 1;
                                     }
-                                    BFInstruction::LoopEnd=>{
-                                        bracket_nesting+=1;
+                                    BFInstruction::LoopEnd => {
+                                        bracket_nesting += 1;
                                     }
-                                    _=>{
-
-                                    }
+                                    _ => {}
                                 }
-                            }else{
-                                eprintln!("unmatched ] at pc= {}",saved_pc);
+                            } else {
+                                eprintln!("unmatched ] at pc= {}", saved_pc);
                             }
                         }
                     }
@@ -117,8 +113,5 @@ impl<R: Read, W: Write> Interpreter<R, W> {
     }
     pub fn exec_program(&mut self) {
         while self.interpret_1_op() {}
-    }
-    pub fn get_program(&self) -> Vec<BFInstruction> {
-        self.program.clone()
     }
 }

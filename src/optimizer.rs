@@ -1,9 +1,8 @@
 use crate::interpreter::BFInstruction;
 use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Dec, DecPtr, Inc, IncPtr, LoopEnd, LoopStart, MoveLeft, MoveRight, MovingAdd, Nop,
-    Read, Sub, SubPtr, Write, ZeroClear, JNZ, JZ,
+    Add, AddPtr, Dec, DecPtr, Inc, IncPtr, Jnz, LoopEnd, LoopStart, MovingAdd, Nop, Read, Sub,
+    SubPtr, Write, ZeroClear, JZ,
 };
-use crate::optimizer::OptLevel::{IncDecOpt1, IncDecOpt2};
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Direction {
     Left,
@@ -21,7 +20,7 @@ pub enum OptInstruction {
     AddPtr(usize),
     SubPtr(usize),
     JZ(usize),
-    JNZ(usize),
+    Jnz(usize),
     Read,
     Write,
     //temporally use
@@ -34,10 +33,7 @@ pub enum OptInstruction {
     DecPtr,
     //[-]
     ZeroClear,
-    //[Dec SubPtr Inc AddPtr]
-    MoveLeft(usize),
-    //[Dec AddPtr Inc SubPtr]
-    MoveRight(usize),
+    //[-<+>] [-<->] [->+<] [->-<]
     //direction offset sign multiplier
     MovingAdd(Direction, usize, Sign, u8),
     //[AddPtr]
@@ -101,7 +97,7 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     if let Some(prev_i) = prev_instruction {
         ir_stack.push(emit_ir(prev_i, burst_len));
     }
-    if opt_level == IncDecOpt1 {
+    if opt_level == OptLevel::IncDecOpt1 {
         return ir_stack;
     }
     //Add(1) Sub(1) AddPtr(1) SubPtr(1) をInc,Dec,IncPtr,DecPtrに特殊化
@@ -227,32 +223,25 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     //Jump optimizing
     let mut i_ptr = 0;
 
-    loop {
-        if let Some(ir) = ir_stack.get(i_ptr) {
-            match ir {
-                OptInstruction::LoopStart => {
-                    let mut depth = 1;
-                    let saved_i_ptr = i_ptr;
-                    while depth != 0 {
-                        i_ptr += 1;
-                        if let Some(i) = ir_stack.get(i_ptr) {
-                            match i {
-                                LoopStart => depth += 1,
-                                LoopEnd => depth -= 1,
-                                _ => {}
-                            }
-                        }
+    while let Some(ir) = ir_stack.get(i_ptr) {
+        if OptInstruction::LoopStart == *ir {
+            let mut depth = 1;
+            let saved_i_ptr = i_ptr;
+            while depth != 0 {
+                i_ptr += 1;
+                if let Some(i) = ir_stack.get(i_ptr) {
+                    match i {
+                        LoopStart => depth += 1,
+                        LoopEnd => depth -= 1,
+                        _ => {}
                     }
-                    ir_stack[saved_i_ptr] = JZ(i_ptr);
-                    ir_stack[i_ptr] = JNZ(saved_i_ptr);
-                    i_ptr = saved_i_ptr;
                 }
-                _ => {}
             }
-            i_ptr += 1;
-        } else {
-            break;
+            ir_stack[saved_i_ptr] = JZ(i_ptr);
+            ir_stack[i_ptr] = Jnz(saved_i_ptr);
+            i_ptr = saved_i_ptr;
         }
+        i_ptr += 1;
     }
 
     ir_stack
@@ -326,7 +315,7 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                         instruction_ptr = *x;
                     }
                 }
-                JNZ(x) => {
+                Jnz(x) => {
                     if mem[data_ptr] != 0 {
                         instruction_ptr = *x;
                     }
@@ -335,16 +324,6 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                     mem[data_ptr] = 0;
                 }
                 Nop => {}
-                OptInstruction::MoveLeft(x) => {
-                    let current_cell_value = mem[data_ptr];
-                    mem[data_ptr] = 0;
-                    mem[data_ptr - *x] = mem[data_ptr - *x].wrapping_add(current_cell_value);
-                }
-                OptInstruction::MoveRight(x) => {
-                    let current_cell_value = mem[data_ptr];
-                    mem[data_ptr] = 0;
-                    mem[data_ptr + *x] = mem[data_ptr + *x].wrapping_add(current_cell_value);
-                }
                 OptInstruction::PtrMoveRight(x) => {
                     while mem[data_ptr] != 0 {
                         data_ptr += *x;

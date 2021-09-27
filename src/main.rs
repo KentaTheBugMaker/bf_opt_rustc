@@ -28,15 +28,15 @@ fn main() {
     }
     let writer = std::io::stdout();
 
-    let mut bench_data =include_str!("../bench_number.txt").to_ascii_lowercase();
-    bench_data= bench_data.replace("\r\n","\n");
-    let bench_data=bench_data.as_bytes();
-    println!("input bytes {:?}",bench_data);
-    let mut vm =interpreter::Interpreter::load_program(bf_ir, bench_data, writer);
-    let instant=Instant::now();
+    let mut bench_data = include_str!("../bench_number.txt").to_ascii_lowercase();
+    bench_data = bench_data.replace("\r\n", "\n");
+    let bench_data = bench_data.as_bytes();
+    println!("input bytes {:?}", bench_data);
+    let mut vm = interpreter::Interpreter::load_program(bf_ir, bench_data, writer);
+    let instant = Instant::now();
     vm.exec_program();
-    println!("non optimized {:?}",instant.elapsed());
-    let writer=std::io::stdout();
+    println!("non optimized {:?}", instant.elapsed());
+    let writer = std::io::stdout();
     let instant = Instant::now();
     optimizer::exec_opt_ir(opt_ir_inc_dec2, bench_data, writer, false);
     let inc_dec_opt_2 = instant.elapsed();
@@ -70,8 +70,8 @@ mod tests {
     use crate::parser::src_to_ir;
     use crate::{interpreter, optimizer};
     use test::Bencher;
-    const CODE:&'static str=include_str!("../fizz_bazz.b");
-    const INPUT:&'static str=include_str!("../bench_number.txt");
+    const CODE: &'static str = include_str!("../fizz_bazz.b");
+    const INPUT: &'static str = include_str!("../bench_number.txt");
     #[bench]
     fn test_inc_dec_opt(b: &mut Bencher) {
         let bf_ir = src_to_ir(CODE);
@@ -88,7 +88,6 @@ mod tests {
     }
     #[bench]
     fn test_zero_clear_opt(b: &mut Bencher) {
-
         let bf_ir = src_to_ir(CODE);
         let opt_ir_zero_clear = optimizer::optimize(&bf_ir, OptLevel::ZeroClear);
         let mut v = vec![0u8; 1024];
@@ -103,7 +102,6 @@ mod tests {
     }
     #[bench]
     fn test_move_ptr_opt(b: &mut Bencher) {
-
         let bf_ir = src_to_ir(CODE);
         let opt_ir_zero_clear = optimizer::optimize(&bf_ir, OptLevel::LoopPtrMove);
         let mut v = vec![0u8; 1024];
@@ -144,5 +142,4 @@ mod tests {
             );
         })
     }
-
 }
