@@ -1,8 +1,5 @@
 use crate::interpreter::BFInstruction;
-use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Dec, DecPtr, Inc, IncPtr, LoopEnd, LoopStart, Nop, Read, Sub, SubPtr, Write,
-    ZeroClear, JNZ, JZ,
-};
+use crate::optimizer::OptInstruction::{Add, AddPtr, Dec, DecPtr, Inc, IncPtr, LoopEnd, LoopStart, Nop, Read, Sub, SubPtr, Write, ZeroClear, JNZ, JZ, MoveLeft, MoveRight};
 use crate::optimizer::OptLevel::{IncDecOpt1, IncDecOpt2};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -43,6 +40,7 @@ pub enum OptLevel {
     ZeroClear,
     JumpOpt,
     LoopPtrMove,
+    LoopDataMove,
 }
 pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstruction> {
     let mut prev_instruction = None;
@@ -107,7 +105,7 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         return ir_stack;
     }
     //opt [-] [+]
-    if ir_stack.len() >= 2 {
+    if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
             if ir_stack[i] == LoopStart && ir_stack[i + 1] == Dec && ir_stack[i + 2] == LoopEnd {
                 ir_stack[i] = ZeroClear;
@@ -126,7 +124,7 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         return ir_stack;
     }
     // opt [>]
-    if ir_stack.len()>=2{
+    if ir_stack.len()>2{
         for i in 0..(ir_stack.len()-2){
             if ir_stack[i]==LoopStart && ir_stack[i+2]==LoopEnd {
                 match ir_stack[i+1]{
@@ -155,14 +153,56 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     if opt_level==OptLevel::LoopPtrMove {
         return ir_stack;
     }
+    //0  1     2     3    4   5
+    //[ Dec SubPtr Inc AddPtr ]
+    //[ Dec AddPtr Inc SubPtr ]
+    if ir_stack.len()>5{
+        for i in 0..(ir_stack.len()-5) {
 
+            if ir_stack[i]==LoopStart && ir_stack[i+5]==LoopEnd{
+                if ir_stack[i+1]==Dec{
+                    if let SubPtr(i_p)= ir_stack[i+2]{
+                        if let AddPtr(d_p)=ir_stack[i+4]{
+                            if i_p==d_p && ir_stack[i+3]==Inc{
+                                ir_stack[i + 0] = Nop;
+                                ir_stack[i + 1] = Nop;
+                                ir_stack[i + 2] = Nop;
+                                ir_stack[i+3]=MoveLeft(i_p);
+                                ir_stack[i + 4] = Nop;
+                                ir_stack[i + 5] = Nop;
 
+                            }
+                        }
+                    }
+
+                    if let AddPtr(i_p)= ir_stack[i+2]{
+                        if let SubPtr(d_p)=ir_stack[i+4]{
+                            if i_p==d_p && ir_stack[i+3]==Inc{
+                                ir_stack[i + 0] = Nop;
+                                ir_stack[i + 1] = Nop;
+                                ir_stack[i + 2] = Nop;
+                                ir_stack[i+3]=MoveRight(i_p);
+                                ir_stack[i + 4] = Nop;
+                                ir_stack[i + 5] = Nop;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
+    if opt_level==OptLevel::LoopDataMove{
+        return ir_stack;
+    }
     ir_stack
 }
 pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
     program: Vec<OptInstruction>,
     mut reader: R,
     mut writer: W,
+    debug:bool,
 ) {
     //VM
     let mut instruction_ptr = 0;
@@ -170,6 +210,9 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
     let mut mem = vec![0u8; 30000];
     loop {
         let op_code = program.get(instruction_ptr);
+        if debug {
+            println!("i_ptr {} i {:?} d_ptr {} ", instruction_ptr, op_code, data_ptr);
+        }
         if let Some(op_code) = op_code {
             match op_code {
                 IncPtr => data_ptr = data_ptr.wrapping_add(1),
@@ -233,12 +276,12 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                 OptInstruction::MoveLeft(x) => {
                     let current_cell_value= mem[data_ptr];
                     mem[data_ptr]=0;
-                    mem[data_ptr-*x]=current_cell_value;
+                    mem[data_ptr-*x]=mem[data_ptr-*x].wrapping_add(current_cell_value);
                 }
                 OptInstruction::MoveRight(x) => {
                     let current_cell_value= mem[data_ptr];
                     mem[data_ptr]=0;
-                    mem[data_ptr+*x]=current_cell_value;
+                    mem[data_ptr+*x]=mem[data_ptr+*x].wrapping_add(current_cell_value);
                 }
                 OptInstruction::PtrMoveRight(x) => {
                     while mem[data_ptr]!=0 {
