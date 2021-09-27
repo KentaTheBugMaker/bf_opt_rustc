@@ -61,35 +61,49 @@ impl<R: Read, W: Write> Interpreter<R, W> {
                         .unwrap();
                 }
                 BFInstruction::LoopStart => {
-                    let mut depth = 1;
-                    if self.mem[self.data_ptr] == 0 {
-                        while depth != 0 {
-                            #[cfg(debug_assertions)]
-                            println!("depth : {} i_ptr : {}", depth, self.instruction_ptr);
-                            self.instruction_ptr += 1;
-                            if let Some(i) = self.program.get(self.instruction_ptr) {
-                                match i {
-                                    BFInstruction::LoopStart => depth += 1,
-                                    BFInstruction::LoopEnd => depth -= 1,
-                                    _ => {}
+                    if self.mem[self.data_ptr]==0{
+                        let mut bracket_nesting=1;
+                        let saved_pc=self.instruction_ptr;
+                        while bracket_nesting>0 {
+                            self.instruction_ptr+=1;
+                            if let Some(instruction)= self.program.get(self.instruction_ptr){
+                                match instruction  {
+                                    BFInstruction::LoopEnd=>{
+                                        bracket_nesting-=1;
+                                    }
+                                    BFInstruction::LoopStart=>{
+                                        bracket_nesting+=1;
+                                    }
+                                    _=>{
+
+                                    }
                                 }
+                            }else{
+                                eprintln!("unmatched [ at pc= {}",saved_pc);
                             }
                         }
                     }
                 }
                 BFInstruction::LoopEnd => {
-                    let mut depth = 1;
-                    if self.mem[self.data_ptr] != 0 {
-                        while depth != 0 {
-                            #[cfg(debug_assertions)]
-                            println!("depth : {} i_ptr : {}", depth, self.instruction_ptr);
-                            self.instruction_ptr -= 1;
-                            if let Some(i) = self.program.get(self.instruction_ptr) {
-                                match i {
-                                    BFInstruction::LoopStart => depth -= 1,
-                                    BFInstruction::LoopEnd => depth += 1,
-                                    _ => {}
+                    if self.mem[self.data_ptr]!=0{
+                        let mut bracket_nesting=1;
+                        let saved_pc=self.instruction_ptr;
+                        while bracket_nesting>0 {
+                            self.instruction_ptr-=1;
+                            if let Some(instruction)= self.program.get(self.instruction_ptr){
+                                match instruction  {
+                                    BFInstruction::LoopStart=>{
+                                        bracket_nesting-=1;
+                                    }
+                                    BFInstruction::LoopEnd=>{
+                                        bracket_nesting+=1;
+                                    }
+                                    _=>{
+
+                                    }
                                 }
+                            }else{
+                                eprintln!("unmatched ] at pc= {}",saved_pc);
                             }
                         }
                     }
