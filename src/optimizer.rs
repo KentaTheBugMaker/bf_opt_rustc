@@ -184,14 +184,13 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
                             }
                         }
                     }
-                    /*
                     SubPtr(i_x) => {
                         if ir_stack[i + 4] == AddPtr(i_x) {
                             if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
                                 generated_ir = MovingAdd(Direction::Left, i_x, ir.0, ir.1)
                             }
                         }
-                    }*/
+                    }
                     IncPtr => {
                         if ir_stack[i + 4] == DecPtr {
                             if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
@@ -199,14 +198,13 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
                             }
                         }
                     }
-                    /*
                     DecPtr => {
                         if ir_stack[i + 4] == IncPtr {
                             if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
-                                generated_ir = MovingAdd(Direction::Right, 1, ir.0, ir.1)
+                                generated_ir = MovingAdd(Direction::Left, 1, ir.0, ir.1)
                             }
                         }
-                    }*/
+                    }
                     _ => {}
                 }
             }
