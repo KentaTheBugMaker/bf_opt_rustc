@@ -42,46 +42,30 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
             OptInstruction::MovingAdd(direction, offset, sign, multiplier) => match direction {
                 Direction::Left => match sign {
                     Sign::Plus => {
-                        let code = format!(
+                        format!(
                             "mem[ptr - {}] += mem[ptr].wrapping_mul({});\n",
                             offset, multiplier
-                        );
-                        rust_code.push_str(&code);
-                        let code = format!("{}mem[ptr] = 0;\n", "\t".repeat(nest));
-                        rust_code.push_str(&code);
-                        "".to_owned()
+                        )
                     }
                     Sign::Minus => {
-                        let code = format!(
+                        format!(
                             "mem[ptr - {}] -= mem[ptr].wrapping_mul({});\n",
                             offset, multiplier
-                        );
-                        rust_code.push_str(&code);
-                        let code = format!("{}mem[ptr] = 0;\n", "\t".repeat(nest));
-                        rust_code.push_str(&code);
-                        "".to_owned()
+                        )
                     }
                 },
                 Direction::Right => match sign {
                     Sign::Plus => {
-                        let code = format!(
+                        format!(
                             "mem[ptr + {}] += mem[ptr].wrapping_mul({});\n",
                             offset, multiplier
-                        );
-                        rust_code.push_str(&code);
-                        let code = format!("{}mem[ptr] = 0;\n", "\t".repeat(nest));
-                        rust_code.push_str(&code);
-                        "".to_owned()
+                        )
                     }
                     Sign::Minus => {
-                        let code = format!(
+                        format!(
                             "mem[ptr + {}] -= mem[ptr].wrapping_mul({});\n",
                             offset, multiplier
-                        );
-                        rust_code.push_str(&code);
-                        let code = format!("{}mem[ptr] = 0;\n", "\t".repeat(nest));
-                        rust_code.push_str(&code);
-                        "".to_owned()
+                        )
                     }
                 },
             },

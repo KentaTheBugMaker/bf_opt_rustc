@@ -45,7 +45,25 @@ pub enum OptLevel {
     LoopPtrMove,
     LoopDataMove,
 }
-pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstruction> {
+/// first pass
+/// no optimization in this pass
+pub fn pass_input(program: &[BFInstruction]) -> Vec<OptInstruction> {
+    program
+        .iter()
+        .map(|ir| match ir {
+            BFInstruction::IncPtr => OptInstruction::AddPtr(1),
+            BFInstruction::DecPtr => OptInstruction::SubPtr(1),
+            BFInstruction::Inc => OptInstruction::Add(1),
+            BFInstruction::Dec => OptInstruction::Sub(1),
+            BFInstruction::Read => OptInstruction::Read,
+            BFInstruction::Write => OptInstruction::Write,
+            BFInstruction::LoopStart => OptInstruction::LoopStart,
+            BFInstruction::LoopEnd => OptInstruction::LoopEnd,
+        })
+        .collect()
+}
+/// > < + - optimization
+pub fn pass_inc_dec_opt(program: &[BFInstruction]) -> Vec<OptInstruction> {
     let mut prev_instruction = None;
     let mut burst_len = 1;
     let mut ir_stack = vec![];
@@ -90,10 +108,10 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     if let Some(prev_i) = prev_instruction {
         ir_stack.push(emit_ir(prev_i, burst_len));
     }
-    if opt_level == OptLevel::IncDecOpt1 {
-        return ir_stack;
-    }
-
+    ir_stack
+}
+/// optimize \[-] \[+]
+pub fn pass_zero_clear(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     //opt [-] [+]
     if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
@@ -110,10 +128,10 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         }
     }
     ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
-    if opt_level == OptLevel::ZeroClear {
-        return ir_stack;
-    }
-    // opt [>]
+    ir_stack
+}
+///optimize \[>] \[<]
+pub fn pass_ptr_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
             if ir_stack[i] == LoopStart && ir_stack[i + 2] == LoopEnd {
@@ -130,9 +148,10 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         }
     }
     ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
-    if opt_level == OptLevel::LoopPtrMove {
-        return ir_stack;
-    }
+    ir_stack
+}
+/// optimize \[-< +|- >] \[-> +|- <]
+pub fn pass_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     // previous nop elimination there are no nops current ir so i can
     //0  1     2     3       4    5
     //[ Dec SubPtr Add/Sub AddPtr ]
@@ -172,19 +191,23 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
                 ir_stack[i + 3] = generated_ir;
-                ir_stack[i + 4] = Nop;
+                ir_stack[i + 4] = ZeroClear;
                 ir_stack[i + 5] = Nop;
             }
         }
     }
 
     ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
-    if opt_level == OptLevel::LoopDataMove {
-        return ir_stack;
-    }
-    //Jump optimizing
-    let mut i_ptr = 0;
+    ir_stack
+}
+/// pointer propagation
+pub fn pass_pointer_propagation(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    ir_stack
+}
 
+/// [ ] -> JZ JNZ pair this is the finalizer pass
+pub fn pass_jump_calc(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    let mut i_ptr = 0;
     while let Some(ir) = ir_stack.get(i_ptr) {
         if OptInstruction::LoopStart == *ir {
             let mut depth = 1;
@@ -205,6 +228,35 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         }
         i_ptr += 1;
     }
+    ir_stack
+}
+pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstruction> {
+    let mut ir_stack = pass_inc_dec_opt(program);
+    if opt_level == OptLevel::IncDecOpt1 {
+        return ir_stack;
+    }
+
+    //opt [-] [+]
+    ir_stack = pass_zero_clear(ir_stack);
+    if opt_level == OptLevel::ZeroClear {
+        return ir_stack;
+    }
+    // opt [>]
+    ir_stack = pass_ptr_move(ir_stack);
+    if opt_level == OptLevel::LoopPtrMove {
+        return ir_stack;
+    }
+    // opt [->+<] [-<->] [->-<] [-<+>]
+    ir_stack = pass_data_move(ir_stack);
+    if opt_level == OptLevel::LoopDataMove {
+        return ir_stack;
+    }
+    //Jump optimizing
+    ir_stack = pass_jump_calc(ir_stack);
+    if opt_level == OptLevel::JumpOpt {
+        return ir_stack;
+    }
+
     // pointer propagation
     //let mut d_ptr=0;
 
@@ -299,21 +351,17 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                     Direction::Left => match sign {
                         Sign::Plus => {
                             mem[data_ptr - *offset] += mem[data_ptr].wrapping_mul(*multiplier);
-                            mem[data_ptr] = 0;
                         }
                         Sign::Minus => {
                             mem[data_ptr - *offset] -= mem[data_ptr].wrapping_mul(*multiplier);
-                            mem[data_ptr] = 0;
                         }
                     },
                     Direction::Right => match sign {
                         Sign::Plus => {
                             mem[data_ptr + *offset] += mem[data_ptr].wrapping_mul(*multiplier);
-                            mem[data_ptr] = 0;
                         }
                         Sign::Minus => {
                             mem[data_ptr + *offset] -= mem[data_ptr].wrapping_mul(*multiplier);
-                            mem[data_ptr] = 0;
                         }
                     },
                 },
