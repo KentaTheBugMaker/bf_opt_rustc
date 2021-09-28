@@ -10,10 +10,12 @@ use std::time::Instant;
 
 extern crate test;
 mod bf2rustc;
+mod formatter;
 mod interpreter;
 mod optimized_rust_code_factor;
 mod optimizer;
 mod parser;
+
 static BENCH_DATA: once_cell::sync::Lazy<Vec<u8>> = once_cell::sync::Lazy::new(|| {
     let mut bench_data = include_str!("../bench_number.txt").to_ascii_lowercase();
     bench_data = bench_data.replace("\r\n", "\n");

@@ -1,7 +1,8 @@
-use crate::interpreter::BFInstruction;
 use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingAdd, Nop, Read, Sub, SubPtr, Write, ZeroClear, JZ,
+    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingAdd, Nop, OtherChar, Read, Sub, SubPtr, Write,
+    ZeroClear, JZ,
 };
+use crate::parser::BFInstruction;
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Direction {
     Left,
@@ -34,8 +35,10 @@ pub enum OptInstruction {
     PtrMoveRight(usize),
     //[SubPtr]
     PtrMoveLeft(usize),
-    //最適化の最中に削除された命令の代わりに入れる
+    //dummy instruction inserted to eliminated instruction
     Nop,
+    //comment
+    OtherChar(char),
 }
 #[derive(Eq, PartialEq)]
 pub enum OptLevel {
@@ -45,23 +48,7 @@ pub enum OptLevel {
     LoopPtrMove,
     LoopDataMove,
 }
-/// first pass
-/// no optimization in this pass
-pub fn pass_input(program: &[BFInstruction]) -> Vec<OptInstruction> {
-    program
-        .iter()
-        .map(|ir| match ir {
-            BFInstruction::IncPtr => OptInstruction::AddPtr(1),
-            BFInstruction::DecPtr => OptInstruction::SubPtr(1),
-            BFInstruction::Inc => OptInstruction::Add(1),
-            BFInstruction::Dec => OptInstruction::Sub(1),
-            BFInstruction::Read => OptInstruction::Read,
-            BFInstruction::Write => OptInstruction::Write,
-            BFInstruction::LoopStart => OptInstruction::LoopStart,
-            BFInstruction::LoopEnd => OptInstruction::LoopEnd,
-        })
-        .collect()
-}
+
 /// > < + - optimization
 pub fn pass_inc_dec_opt(program: &[BFInstruction]) -> Vec<OptInstruction> {
     let mut prev_instruction = None;
@@ -80,6 +67,7 @@ pub fn pass_inc_dec_opt(program: &[BFInstruction]) -> Vec<OptInstruction> {
             BFInstruction::Write => Write,
             BFInstruction::LoopStart => LoopStart,
             BFInstruction::LoopEnd => LoopEnd,
+            BFInstruction::OtherChar(_) => OptInstruction::Nop,
         }
     }
     for instruction in program {
@@ -335,7 +323,7 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                 ZeroClear => {
                     mem[data_ptr] = 0;
                 }
-                Nop => {}
+                Nop | OtherChar(_) => {}
                 OptInstruction::PtrMoveRight(x) => {
                     while mem[data_ptr] != 0 {
                         data_ptr += *x;

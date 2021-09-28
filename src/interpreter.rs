@@ -1,22 +1,5 @@
+use crate::parser::BFInstruction;
 use std::io::{Read, Write};
-
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub enum BFInstruction {
-    //ptr++;
-    IncPtr,
-    //ptr--;
-    DecPtr,
-    // *ptr++;
-    Inc,
-    // *ptr--;
-    Dec,
-    //I/O
-    Read,
-    Write,
-    //ControlFlow
-    LoopStart,
-    LoopEnd,
-}
 
 pub struct Interpreter<R: Read, W: Write> {
     mem: Vec<u8>,
@@ -104,6 +87,8 @@ impl<R: Read, W: Write> Interpreter<R, W> {
                         }
                     }
                 }
+                //Comment
+                BFInstruction::OtherChar(_) => {}
             }
             self.instruction_ptr += 1;
             true

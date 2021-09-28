@@ -1,8 +1,24 @@
-use crate::interpreter::BFInstruction;
-
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
+pub enum BFInstruction {
+    //ptr++;
+    IncPtr,
+    //ptr--;
+    DecPtr,
+    // *ptr++;
+    Inc,
+    // *ptr--;
+    Dec,
+    //I/O
+    Read,
+    Write,
+    //ControlFlow
+    LoopStart,
+    LoopEnd,
+    //other char
+    OtherChar(char),
+}
 pub fn src_to_ir(code: &str) -> Vec<BFInstruction> {
     code.chars()
-        .filter(|x| matches!(x, '>' | '<' | '+' | '-' | '.' | ',' | '[' | ']'))
         .map(|x| match x {
             '>' => BFInstruction::IncPtr,
             '<' => BFInstruction::DecPtr,
@@ -12,7 +28,7 @@ pub fn src_to_ir(code: &str) -> Vec<BFInstruction> {
             ',' => BFInstruction::Read,
             '[' => BFInstruction::LoopStart,
             ']' => BFInstruction::LoopEnd,
-            _ => unreachable!(),
+            ch => BFInstruction::OtherChar(ch),
         })
         .collect()
 }
