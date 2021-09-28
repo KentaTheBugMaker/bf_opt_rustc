@@ -67,7 +67,6 @@ pub fn pass_inc_dec_opt(program: &[BFInstruction]) -> Vec<OptInstruction> {
             BFInstruction::Write => Write,
             BFInstruction::LoopStart => LoopStart,
             BFInstruction::LoopEnd => LoopEnd,
-            BFInstruction::OtherChar(_) => OptInstruction::Nop,
         }
     }
     for instruction in program {

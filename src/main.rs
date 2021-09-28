@@ -24,6 +24,8 @@ static BENCH_DATA: once_cell::sync::Lazy<Vec<u8>> = once_cell::sync::Lazy::new(|
 const CODE: &'static str = include_str!("../factor.b");
 fn main() {
     let bf_ir = src_to_ir(CODE);
+    let formatted_code = formatter::brain_fuck_fmt(CODE);
+    println!("{}", formatted_code);
     let mut vm = interpreter::Interpreter::load_program(
         bf_ir.clone(),
         BENCH_DATA.deref().as_slice(),

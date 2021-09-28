@@ -75,7 +75,7 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
             OptInstruction::PtrMoveLeft(x) => {
                 format!("while mem[ptr] != 0 {{ ptr -= {};}}\n", x)
             }
-            OptInstruction::Nop => "".to_owned(),
+            OptInstruction::Nop | OptInstruction::OtherChar(_) => "".to_owned(),
         };
         rust_code.push_str(&code_let);
     }

@@ -87,8 +87,6 @@ impl<R: Read, W: Write> Interpreter<R, W> {
                         }
                     }
                 }
-                //Comment
-                BFInstruction::OtherChar(_) => {}
             }
             self.instruction_ptr += 1;
             true

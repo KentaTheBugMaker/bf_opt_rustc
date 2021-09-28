@@ -14,11 +14,10 @@ pub enum BFInstruction {
     //ControlFlow
     LoopStart,
     LoopEnd,
-    //other char
-    OtherChar(char),
 }
 pub fn src_to_ir(code: &str) -> Vec<BFInstruction> {
     code.chars()
+        .filter(|x| matches!(x, '>' | '<' | '+' | '-' | '.' | ',' | '[' | ']'))
         .map(|x| match x {
             '>' => BFInstruction::IncPtr,
             '<' => BFInstruction::DecPtr,
@@ -28,7 +27,7 @@ pub fn src_to_ir(code: &str) -> Vec<BFInstruction> {
             ',' => BFInstruction::Read,
             '[' => BFInstruction::LoopStart,
             ']' => BFInstruction::LoopEnd,
-            ch => BFInstruction::OtherChar(ch),
+            _ => unreachable!(),
         })
         .collect()
 }
