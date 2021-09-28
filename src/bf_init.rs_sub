@@ -3,4 +3,4 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(
     mut writer: W,
 ) {
     let mut mem:Vec<u8> = vec![0;30000];
-    let mut data_ptr:usize = 0;
+    let mut ptr:usize = 0;

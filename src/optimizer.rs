@@ -1,7 +1,6 @@
 use crate::interpreter::BFInstruction;
 use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Dec, DecPtr, Inc, IncPtr, Jnz, LoopEnd, LoopStart, MovingAdd, Nop, Read, Sub,
-    SubPtr, Write, ZeroClear, JZ,
+    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingAdd, Nop, Read, Sub, SubPtr, Write, ZeroClear, JZ,
 };
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Direction {
@@ -26,11 +25,6 @@ pub enum OptInstruction {
     //temporally use
     LoopStart,
     LoopEnd,
-    //Add Sub AddPtr SubPtr 1 の特殊化
-    Inc,
-    Dec,
-    IncPtr,
-    DecPtr,
     //[-]
     ZeroClear,
     //[-<+>] [-<->] [->+<] [->-<]
@@ -46,7 +40,6 @@ pub enum OptInstruction {
 #[derive(Eq, PartialEq)]
 pub enum OptLevel {
     IncDecOpt1,
-    IncDecOpt2,
     ZeroClear,
     JumpOpt,
     LoopPtrMove,
@@ -100,29 +93,16 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     if opt_level == OptLevel::IncDecOpt1 {
         return ir_stack;
     }
-    //Add(1) Sub(1) AddPtr(1) SubPtr(1) をInc,Dec,IncPtr,DecPtrに特殊化
-    ir_stack = ir_stack
-        .iter()
-        .map(|ir| match ir {
-            Add(1) => Inc,
-            Sub(1) => Dec,
-            AddPtr(1) => IncPtr,
-            SubPtr(1) => DecPtr,
-            _ => *ir,
-        })
-        .collect();
-    if opt_level == OptLevel::IncDecOpt2 {
-        return ir_stack;
-    }
+
     //opt [-] [+]
     if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
-            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Dec && ir_stack[i + 2] == LoopEnd {
+            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Sub(1) && ir_stack[i + 2] == LoopEnd {
                 ir_stack[i] = ZeroClear;
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
             }
-            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Inc && ir_stack[i + 2] == LoopEnd {
+            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Add(1) && ir_stack[i + 2] == LoopEnd {
                 ir_stack[i] = ZeroClear;
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
@@ -138,8 +118,6 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         for i in 0..(ir_stack.len() - 2) {
             if ir_stack[i] == LoopStart && ir_stack[i + 2] == LoopEnd {
                 match ir_stack[i + 1] {
-                    IncPtr => ir_stack[i + 1] = OptInstruction::PtrMoveRight(1),
-                    DecPtr => ir_stack[i + 1] = OptInstruction::PtrMoveLeft(1),
                     AddPtr(x) => ir_stack[i + 1] = OptInstruction::PtrMoveRight(x),
                     SubPtr(x) => ir_stack[i + 1] = OptInstruction::PtrMoveLeft(x),
                     _ => {
@@ -157,21 +135,19 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
     }
     // previous nop elimination there are no nops current ir so i can
     //0  1     2     3       4    5
-    //[ Dec SubPtr Inc/Dec AddPtr ]
-    //[ Dec AddPtr Inc/Dec SubPtr ]
+    //[ Dec SubPtr Add/Sub AddPtr ]
+    //[ Dec AddPtr Add/Sub SubPtr ]
     let test_inc_dec = |ir: OptInstruction| -> Option<(Sign, u8)> {
         match ir {
             Add(x) => Some((Sign::Plus, x)),
             Sub(x) => Some((Sign::Minus, x)),
-            Inc => Some((Sign::Plus, 1)),
-            Dec => Some((Sign::Minus, 1)),
             _ => None,
         }
     };
     if ir_stack.len() > 5 {
         for i in 0..(ir_stack.len() - 5) {
             let mut generated_ir = Nop;
-            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Dec && ir_stack[i + 5] == LoopEnd {
+            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Sub(1) && ir_stack[i + 5] == LoopEnd {
                 match ir_stack[i + 2] {
                     AddPtr(i_x) => {
                         if ir_stack[i + 4] == SubPtr(i_x) {
@@ -184,20 +160,6 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
                         if ir_stack[i + 4] == AddPtr(i_x) {
                             if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
                                 generated_ir = MovingAdd(Direction::Left, i_x, ir.0, ir.1)
-                            }
-                        }
-                    }
-                    IncPtr => {
-                        if ir_stack[i + 4] == DecPtr {
-                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
-                                generated_ir = MovingAdd(Direction::Right, 1, ir.0, ir.1)
-                            }
-                        }
-                    }
-                    DecPtr => {
-                        if ir_stack[i + 4] == IncPtr {
-                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
-                                generated_ir = MovingAdd(Direction::Left, 1, ir.0, ir.1)
                             }
                         }
                     }
@@ -243,6 +205,8 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         }
         i_ptr += 1;
     }
+    // pointer propagation
+    //let mut d_ptr=0;
 
     ir_stack
 }
@@ -266,10 +230,6 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
         }
         if let Some(op_code) = op_code {
             match op_code {
-                IncPtr => data_ptr = data_ptr.wrapping_add(1),
-                DecPtr => data_ptr = data_ptr.wrapping_sub(1),
-                Inc => mem[data_ptr] = mem[data_ptr].wrapping_add(1),
-                Dec => mem[data_ptr] = mem[data_ptr].wrapping_sub(1),
                 Read => {
                     reader.read_exact(&mut mem[data_ptr..data_ptr + 1]).unwrap();
                 }

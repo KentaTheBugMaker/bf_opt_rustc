@@ -16,7 +16,8 @@ mod parser;
 fn main() {
     let code = include_str!("../factor.b");
     let bf_ir = src_to_ir(code);
-    let opt_ir_inc_dec2 = optimizer::optimize(&bf_ir, OptLevel::IncDecOpt2);
+    let opt_ir_inc_dec1 = optimizer::optimize(&bf_ir, OptLevel::IncDecOpt1);
+
     let opt_ir_zero_clear = optimizer::optimize(&bf_ir, OptLevel::ZeroClear);
     let opt_ir_move_ptr = optimizer::optimize(&bf_ir, OptLevel::LoopPtrMove);
     let opt_ir_data_move = optimizer::optimize(&bf_ir, OptLevel::LoopDataMove);
@@ -39,11 +40,13 @@ fn main() {
     let instant = Instant::now();
     vm.exec_program();
     println!("non optimized {:?}", instant.elapsed());
+
     let writer = std::io::stdout();
     let instant = Instant::now();
-    optimizer::exec_opt_ir(opt_ir_inc_dec2, bench_data, writer, false);
-    let inc_dec_opt_2 = instant.elapsed();
-    println!("inc_dec_opt2 interpreter elapsed {:?}", inc_dec_opt_2);
+    optimizer::exec_opt_ir(opt_ir_inc_dec1, bench_data, writer, false);
+    let inc_dec_opt_1 = instant.elapsed();
+    println!("inc_dec_opt1 interpreter elapsed {:?}", inc_dec_opt_1);
+
     let writer = std::io::stdout();
     let instant = Instant::now();
     optimizer::exec_opt_ir(opt_ir_zero_clear, bench_data, writer, false);
@@ -76,24 +79,31 @@ mod tests {
 
     use crate::optimizer::OptLevel;
     use crate::parser::src_to_ir;
-    use crate::{interpreter, optimizer};
+    use crate::{optimized_rust_code_factor, optimizer};
+    use std::ops::Deref;
     use test::Bencher;
-    const CODE: &'static str = include_str!("../fizz_bazz.b");
-    const INPUT: &'static str = include_str!("../bench_number.txt");
+
+    const CODE: &'static str = include_str!("../mandelbrot.b");
+    static BENCH_DATA: once_cell::sync::Lazy<Vec<u8>> = once_cell::sync::Lazy::new(|| {
+        let mut bench_data = include_str!("../bench_number.txt").to_ascii_lowercase();
+        bench_data = bench_data.replace("\r\n", "\n");
+        bench_data.into_bytes()
+    });
     #[bench]
     fn test_inc_dec_opt(b: &mut Bencher) {
         let bf_ir = src_to_ir(CODE);
-        let opt_ir_zero_clear = optimizer::optimize(&bf_ir, OptLevel::IncDecOpt2);
+        let opt_ir_zero_clear = optimizer::optimize(&bf_ir, OptLevel::IncDecOpt1);
         let mut v = vec![0u8; 1024];
         b.iter(|| {
             optimizer::exec_opt_ir(
                 opt_ir_zero_clear.clone(),
-                INPUT.as_bytes(),
+                BENCH_DATA.deref().as_slice(),
                 v.as_mut_slice(),
                 false,
             );
         })
     }
+
     #[bench]
     fn test_zero_clear_opt(b: &mut Bencher) {
         let bf_ir = src_to_ir(CODE);
@@ -102,7 +112,7 @@ mod tests {
         b.iter(|| {
             optimizer::exec_opt_ir(
                 opt_ir_zero_clear.clone(),
-                INPUT.as_bytes(),
+                BENCH_DATA.deref().as_slice(),
                 v.as_mut_slice(),
                 false,
             );
@@ -116,7 +126,7 @@ mod tests {
         b.iter(|| {
             optimizer::exec_opt_ir(
                 opt_ir_zero_clear.clone(),
-                INPUT.as_bytes(),
+                BENCH_DATA.deref().as_slice(),
                 v.as_mut_slice(),
                 false,
             );
@@ -130,7 +140,7 @@ mod tests {
         b.iter(|| {
             optimizer::exec_opt_ir(
                 opt_ir_zero_clear.clone(),
-                INPUT.as_bytes(),
+                BENCH_DATA.deref().as_slice(),
                 v.as_mut_slice(),
                 false,
             );
@@ -144,10 +154,17 @@ mod tests {
         b.iter(|| {
             optimizer::exec_opt_ir(
                 opt_ir_zero_clear.clone(),
-                INPUT.as_bytes(),
+                BENCH_DATA.deref().as_slice(),
                 v.as_mut_slice(),
                 false,
             );
+        })
+    }
+    #[bench]
+    fn test_native_code(b: &mut Bencher) {
+        let mut v = vec![0u8; 1024];
+        b.iter(|| {
+            optimized_rust_code_factor::bf_main(BENCH_DATA.deref().as_slice(), v.as_mut_slice());
         })
     }
 }
