@@ -7,6 +7,7 @@ pub fn brain_fuck_fmt(source: &str) -> String {
     let bf_ir = src_to_ir(source);
     let grouped_ir = pass_inc_dec_opt(&bf_ir);
     let mut bf_code = String::new();
+    let mut pop_tab=false;
     for ir in grouped_ir.iter() {
         bf_code.push_str(&("\t".repeat(nest)));
         let code_let = match ir {
@@ -22,6 +23,7 @@ pub fn brain_fuck_fmt(source: &str) -> String {
             }
             OptInstruction::LoopEnd => {
                 nest -= 1;
+                pop_tab=true;
                 "]".to_owned()
             }
             OptInstruction::OtherChar(_) => "".to_owned(),
@@ -29,8 +31,12 @@ pub fn brain_fuck_fmt(source: &str) -> String {
                 unreachable!("pass give me not supported instruction : {:?}", unreachable)
             }
         };
+        if pop_tab{
+            bf_code.pop();
+        }
         bf_code.push_str(&code_let);
         bf_code.push('\n');
+        pop_tab=false;
     }
     bf_code
 }
