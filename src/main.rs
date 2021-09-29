@@ -70,7 +70,7 @@ fn main() {
         instant.elapsed()
     );
 
-    let data_move_opt = optimizer::pass_data_move(ptr_move_opt);
+    let data_move_opt = optimizer::pass_generic_data_move(ptr_move_opt);
     let instant = Instant::now();
     optimizer::exec_opt_ir(
         data_move_opt.clone(),
