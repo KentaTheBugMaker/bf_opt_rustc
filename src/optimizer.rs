@@ -116,7 +116,6 @@ pub fn pass_zero_clear(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction>
             }
         }
     }
-    ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
     ir_stack
 }
 ///optimize \[>] \[<]
@@ -136,19 +135,16 @@ pub fn pass_ptr_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
             }
         }
     }
-    ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
     ir_stack
 }
 /// optimize data move.
-///
-/// this grant pointer virginity.
 ///
 /// target instruction stream
 ///
 /// * LS Sub(1) (AddPtr(x) Add|Sub(const))* SubPtr(sum(x)) LE
 /// * LS Sub(1) (SubPtr(x) Add|Sub(const))* AddPtr(sum(x)) LE   
-/// * LS (AddPtr(x) Add|Sub(const))* SubPtr(sum(x)) Sub(1) LE
-/// * LS (SubPtr(x) Add|Sub(const))* AddPtr(sum(x)) Sub(1) LE
+/// * LS (AddPtr(x) Add|Sub(const))* SubPtr(sum(x)) Sub(1) LE (not implemented yet)
+/// * LS (SubPtr(x) Add|Sub(const))* AddPtr(sum(x)) Sub(1) LE (not implemented yet)
 pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     let mut i_ptr = 0;
     let mut code_lets = Vec::new();
@@ -170,17 +166,17 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
         }
     }
 
-    while let Some(start)=ir_stack.get(i_ptr){
+    while let Some(start) = ir_stack.get(i_ptr) {
         // [
-        if *start==OptInstruction::LoopStart {
-            let saved_pc=i_ptr;
-            let next=ir_stack[i_ptr+1];
-            println!("{} : {:?}",i_ptr+1,next);
+        if *start == OptInstruction::LoopStart {
+            let saved_pc = i_ptr;
+            let next = ir_stack[i_ptr + 1];
+            //println!("{} : {:?}", i_ptr + 1, next);
             //-
-            if next==OptInstruction::Sub(1) {
+            if next == OptInstruction::Sub(1) {
                 loop {
                     let pair = (ir_stack[i_ptr + 2], ir_stack[i_ptr + 3]);
-                    println!("{},{} {:?}",i_ptr+2,i_ptr+3,pair);
+                    println!("{},{} {:?}", i_ptr + 2, i_ptr + 3, pair);
                     match pair {
                         (AddPtr(offset), Add(x)) => {
                             ptr_offsets += offset;
@@ -190,7 +186,12 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                         (AddPtr(offset), Sub(x)) => {
                             ptr_offsets += offset;
                             direction.replace(Direction::Right);
-                            code_lets.push(MovingAdd(Direction::Right, ptr_offsets, Sign::Minus, x));
+                            code_lets.push(MovingAdd(
+                                Direction::Right,
+                                ptr_offsets,
+                                Sign::Minus,
+                                x,
+                            ));
                         }
                         (SubPtr(offset), Add(x)) => {
                             ptr_offsets += offset;
@@ -207,9 +208,9 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                             if let Some(Direction::Right) = direction {
                                 if offset == ptr_offsets {
                                     replaces.push((saved_pc..i_ptr + 3, code_lets.clone()));
-                                    println!("emit {}..{} {:?}",saved_pc,i_ptr+3,code_lets);
-                                    i_ptr+=2;
-                                    ptr_offsets=0;
+                                    //println!("emit {}..{} {:?}", saved_pc, i_ptr + 3, code_lets);
+                                    i_ptr += 2;
+                                    ptr_offsets = 0;
                                     code_lets.clear();
                                     break;
                                 }
@@ -219,9 +220,9 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                             if let Some(Direction::Left) = direction {
                                 if offset == ptr_offsets {
                                     replaces.push((saved_pc..i_ptr + 3, code_lets.clone()));
-                                    println!("emit {}..{} {:?}",saved_pc,i_ptr+3,code_lets);
-                                    i_ptr+=2;
-                                    ptr_offsets=0;
+                                    //println!("emit {}..{} {:?}", saved_pc, i_ptr + 3, code_lets);
+                                    i_ptr += 2;
+                                    ptr_offsets = 0;
                                     code_lets.clear();
                                     break;
                                 }
@@ -229,18 +230,18 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                         }
                         _ => {
                             code_lets.clear();
-                            i_ptr+=2;
-                            ptr_offsets=0;
+                            i_ptr += 2;
+                            ptr_offsets = 0;
                             break;
                         }
                     }
                     i_ptr += 2;
                 }
-            }else{
-                i_ptr+=1;
+            } else {
+                i_ptr += 1;
             }
-        }else{
-            i_ptr+=1;
+        } else {
+            i_ptr += 1;
         }
     }
 
@@ -248,7 +249,14 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
         let code_len = instructions.len();
         let saved_pc = range.start;
         let end = range.end;
-        println!("{}..{} : replace {:?}->{:?}",saved_pc,end,&ir_stack[saved_pc..(end+1)],instructions);
+        /*
+        println!(
+            "{}..{} : replace {:?}->{:?}",
+            saved_pc,
+            end,
+            &ir_stack[saved_pc..(end + 1)],
+            instructions
+        );*/
         //insert moving add instruction
         for i in saved_pc..(saved_pc + code_len) {
             ir_stack[i] = instructions.remove(0);
@@ -261,61 +269,18 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
     }
     ir_stack
 }
-/// optimize \[-< +|- >] \[-> +|- <]
-pub fn pass_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
-    // previous nop elimination there are no nops current ir so i can
-    //0  1     2     3       4    5
-    //[ Dec SubPtr Add/Sub AddPtr ]
-    //[ Dec AddPtr Add/Sub SubPtr ]
-    let test_inc_dec = |ir: OptInstruction| -> Option<(Sign, u8)> {
-        match ir {
-            Add(x) => Some((Sign::Plus, x)),
-            Sub(x) => Some((Sign::Minus, x)),
-            _ => None,
-        }
-    };
-    if ir_stack.len() > 5 {
-        for i in 0..(ir_stack.len() - 5) {
-            let mut generated_ir = Nop;
-            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Sub(1) && ir_stack[i + 5] == LoopEnd {
-                match ir_stack[i + 2] {
-                    AddPtr(i_x) => {
-                        if ir_stack[i + 4] == SubPtr(i_x) {
-                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
-                                generated_ir = MovingAdd(Direction::Right, i_x, ir.0, ir.1)
-                            }
-                        }
-                    }
-                    SubPtr(i_x) => {
-                        if ir_stack[i + 4] == AddPtr(i_x) {
-                            if let Some(ir) = test_inc_dec(ir_stack[i + 3]) {
-                                generated_ir = MovingAdd(Direction::Left, i_x, ir.0, ir.1)
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            //insert ir
-            if generated_ir != Nop {
-                ir_stack[i] = Nop;
-                ir_stack[i + 1] = Nop;
-                ir_stack[i + 2] = Nop;
-                ir_stack[i + 3] = generated_ir;
-                ir_stack[i + 4] = ZeroClear;
-                ir_stack[i + 5] = Nop;
-            }
-        }
-    }
-
-    ir_stack = ir_stack.iter().filter(|ir| **ir != Nop).copied().collect();
-    ir_stack
-}
 /// pointer propagation
 pub fn pass_pointer_propagation(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     ir_stack
 }
-
+/// remove nop
+pub fn pass_nop_remove(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    ir_stack
+        .iter()
+        .filter(|ir| **ir != OptInstruction::Nop)
+        .copied()
+        .collect()
+}
 /// [ ] -> JZ JNZ pair this is the finalizer pass
 pub fn pass_jump_calc(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     let mut i_ptr = 0;
@@ -358,7 +323,7 @@ pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstru
         return ir_stack;
     }
     // opt [->+<] [-<->] [->-<] [-<+>]
-    ir_stack = pass_data_move(ir_stack);
+    ir_stack = pass_generic_data_move(ir_stack);
     if opt_level == OptLevel::LoopDataMove {
         return ir_stack;
     }

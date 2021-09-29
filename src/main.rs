@@ -39,44 +39,47 @@ fn main() {
         instant.elapsed()
     );
 
-    let inc_dec_opt = optimizer::pass_inc_dec_opt(&bf_ir);     let instant = Instant::now();
-        optimizer::exec_opt_ir(
-            inc_dec_opt.clone(),
-            BENCH_DATA.deref().as_slice(),
-            std::io::stdout(),
-            false,
-        );
-        println!("++ -- >> << Inc Dec optimization {:?}", instant.elapsed());
+    let inc_dec_opt = optimizer::pass_inc_dec_opt(&bf_ir);
+    let instant = Instant::now();
+    optimizer::exec_opt_ir(
+        inc_dec_opt.clone(),
+        BENCH_DATA.deref().as_slice(),
+        std::io::stdout(),
+        false,
+    );
+    println!("++ -- >> << Inc Dec optimization {:?}", instant.elapsed());
 
     let zero_clear_opt = optimizer::pass_zero_clear(inc_dec_opt);
-
-        let instant = Instant::now();
-        optimizer::exec_opt_ir(
-            zero_clear_opt.clone(),
-            BENCH_DATA.deref().as_slice(),
-            std::io::stdout(),
-            false,
-        );
-        println!("[-] 0 clear idiom optimization {:?}", instant.elapsed());
+    let zero_clear_opt = optimizer::pass_nop_remove(zero_clear_opt);
+    let instant = Instant::now();
+    optimizer::exec_opt_ir(
+        zero_clear_opt.clone(),
+        BENCH_DATA.deref().as_slice(),
+        std::io::stdout(),
+        false,
+    );
+    println!("[-] 0 clear idiom optimization {:?}", instant.elapsed());
 
     let ptr_move_opt = optimizer::pass_ptr_move(zero_clear_opt);
-
-        let instant = Instant::now();
-        optimizer::exec_opt_ir(
-            ptr_move_opt.clone(),
-            BENCH_DATA.deref().as_slice(),
-            std::io::stdout(),
-            false,
-        );
-        println!(
-            "[>>] 0 cell search by constant stride optimization {:?}",
-            instant.elapsed()
-        );
+    let ptr_move_opt = optimizer::pass_nop_remove(ptr_move_opt);
+    let instant = Instant::now();
+    optimizer::exec_opt_ir(
+        ptr_move_opt.clone(),
+        BENCH_DATA.deref().as_slice(),
+        std::io::stdout(),
+        false,
+    );
+    println!(
+        "[>>] 0 cell search by constant stride optimization {:?}",
+        instant.elapsed()
+    );
 
     let data_move_opt = optimizer::pass_generic_data_move(ptr_move_opt.clone());
-    for (i,( ir,un_optimized)) in data_move_opt.iter().zip(ptr_move_opt.iter()).enumerate() {
-        println!("{} : {:?} {:?}", i, ir,un_optimized);
-    }
+    let data_move_opt = optimizer::pass_nop_remove(data_move_opt);
+    /*
+    for (i, (ir, un_optimized)) in data_move_opt.iter().zip(ptr_move_opt.iter()).enumerate() {
+        println!("{} : {:?} {:?}", i, ir, un_optimized);
+    }*/
     let instant = Instant::now();
     optimizer::exec_opt_ir(
         data_move_opt.clone(),
@@ -88,7 +91,8 @@ fn main() {
         "[->+<] data moving add optimization {:?}",
         instant.elapsed()
     );
-
+    let rust_code = bf2rustc::emit_rust_code(&data_move_opt);
+    println!("{}", rust_code);
     let jump_calc = optimizer::pass_jump_calc(data_move_opt);
     let instant = Instant::now();
     optimizer::exec_opt_ir(

@@ -76,14 +76,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
             ptr = ptr.wrapping_add(1);
             mem[ptr] = 0;
             ptr = ptr.wrapping_sub(7);
-            while mem[ptr] != 0 {
-                mem[ptr] = mem[ptr].wrapping_sub(1);
-                ptr = ptr.wrapping_add(3);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_add(1);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_sub(4);
-            }
+            mem[ptr + 3] += mem[ptr].wrapping_mul(1);
+            mem[ptr + 4] += mem[ptr].wrapping_mul(1);
+            mem[ptr] = 0;
             ptr = ptr.wrapping_add(8);
         }
         ptr = ptr.wrapping_sub(10);
@@ -96,14 +91,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
         ptr = ptr.wrapping_add(10);
         while mem[ptr] != 0 {
             ptr = ptr.wrapping_add(1);
-            while mem[ptr] != 0 {
-                mem[ptr] = mem[ptr].wrapping_sub(1);
-                ptr = ptr.wrapping_add(3);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_add(2);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_sub(5);
-            }
+            mem[ptr + 3] += mem[ptr].wrapping_mul(1);
+            mem[ptr + 5] += mem[ptr].wrapping_mul(1);
+            mem[ptr] = 0;
             ptr = ptr.wrapping_add(9);
         }
         ptr = ptr.wrapping_sub(10);
@@ -226,14 +216,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
             ptr = ptr.wrapping_sub(10);
             while mem[ptr] != 0 {
                 ptr = ptr.wrapping_add(9);
-                while mem[ptr] != 0 {
-                    mem[ptr] = mem[ptr].wrapping_sub(1);
-                    ptr = ptr.wrapping_sub(1);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_sub(3);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_add(4);
-                }
+                mem[ptr - 1] += mem[ptr].wrapping_mul(1);
+                mem[ptr - 4] += mem[ptr].wrapping_mul(1);
+                mem[ptr] = 0;
                 ptr = ptr.wrapping_sub(19);
             }
             ptr = ptr.wrapping_add(10);
@@ -308,14 +293,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
             ptr = ptr.wrapping_sub(10);
             while mem[ptr] != 0 {
                 ptr = ptr.wrapping_add(4);
-                while mem[ptr] != 0 {
-                    mem[ptr] = mem[ptr].wrapping_sub(1);
-                    ptr = ptr.wrapping_add(3);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_add(2);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_sub(5);
-                }
+                mem[ptr + 3] += mem[ptr].wrapping_mul(1);
+                mem[ptr + 5] += mem[ptr].wrapping_mul(1);
+                mem[ptr] = 0;
                 ptr = ptr.wrapping_sub(14);
             }
             ptr = ptr.wrapping_add(10);
@@ -393,14 +373,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                 ptr = ptr.wrapping_add(1);
                 mem[ptr] = 0;
                 ptr = ptr.wrapping_sub(5);
-                while mem[ptr] != 0 {
-                    mem[ptr] = mem[ptr].wrapping_sub(1);
-                    ptr = ptr.wrapping_add(3);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_add(1);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_sub(4);
-                }
+                mem[ptr + 3] += mem[ptr].wrapping_mul(1);
+                mem[ptr + 4] += mem[ptr].wrapping_mul(1);
+                mem[ptr] = 0;
                 ptr = ptr.wrapping_add(6);
             }
             ptr = ptr.wrapping_sub(10);
@@ -409,14 +384,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                 mem[ptr - 4] += mem[ptr].wrapping_mul(1);
                 mem[ptr] = 0;
                 ptr = ptr.wrapping_sub(3);
-                while mem[ptr] != 0 {
-                    mem[ptr] = mem[ptr].wrapping_sub(1);
-                    ptr = ptr.wrapping_add(3);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_add(1);
-                    mem[ptr] = mem[ptr].wrapping_add(1);
-                    ptr = ptr.wrapping_sub(4);
-                }
+                mem[ptr + 3] += mem[ptr].wrapping_mul(1);
+                mem[ptr + 4] += mem[ptr].wrapping_mul(1);
+                mem[ptr] = 0;
                 ptr = ptr.wrapping_sub(15);
             }
             ptr = ptr.wrapping_add(10);
@@ -799,14 +769,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
         ptr = ptr.wrapping_sub(6);
         while mem[ptr] != 0 {
             ptr = ptr.wrapping_add(3);
-            while mem[ptr] != 0 {
-                mem[ptr] = mem[ptr].wrapping_sub(1);
-                ptr = ptr.wrapping_add(4);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_add(1);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_sub(5);
-            }
+            mem[ptr + 4] += mem[ptr].wrapping_mul(1);
+            mem[ptr + 5] += mem[ptr].wrapping_mul(1);
+            mem[ptr] = 0;
             ptr = ptr.wrapping_add(7);
         }
         ptr = ptr.wrapping_sub(10);
@@ -815,14 +780,9 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
             mem[ptr - 4] += mem[ptr].wrapping_mul(1);
             mem[ptr] = 0;
             ptr = ptr.wrapping_sub(5);
-            while mem[ptr] != 0 {
-                mem[ptr] = mem[ptr].wrapping_sub(1);
-                ptr = ptr.wrapping_add(5);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_add(2);
-                mem[ptr] = mem[ptr].wrapping_add(1);
-                ptr = ptr.wrapping_sub(7);
-            }
+            mem[ptr + 5] += mem[ptr].wrapping_mul(1);
+            mem[ptr + 7] += mem[ptr].wrapping_mul(1);
+            mem[ptr] = 0;
             ptr = ptr.wrapping_sub(12);
         }
         ptr = ptr.wrapping_add(10);

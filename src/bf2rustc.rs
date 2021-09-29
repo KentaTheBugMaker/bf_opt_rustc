@@ -32,7 +32,7 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
             OptInstruction::Write => "writer.write_all(&mem[ptr..ptr + 1]).unwrap();\n".to_owned(),
             OptInstruction::LoopStart => {
                 nest += 1;
-                "while mem[ptr]!=0{\n".to_owned()
+                "while mem[ptr] != 0 {\n".to_owned()
             }
             OptInstruction::LoopEnd => {
                 nest -= 1;
