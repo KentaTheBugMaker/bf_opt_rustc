@@ -152,7 +152,7 @@ pub fn pass_ptr_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
 pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     let mut i_ptr = 0;
     let mut code_lets = Vec::new();
-    let mut replaces=Vec::new();
+    let mut replaces = Vec::new();
     let mut ptr_offsets = 0;
     let mut direction = None;
     fn ptr_op_to_direction(op: OptInstruction) -> Option<Direction> {
@@ -208,17 +208,10 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                                                     && ir_stack[i_ptr + 1]
                                                         == OptInstruction::LoopEnd
                                                 {
-                                                    let code_len = code_lets.len();
-                                                    //insert moving add instruction
-                                                    for i in saved_pc..(saved_pc + code_len) {
-                                                        ir_stack[i] = code_lets.remove(0);
-                                                    }
-                                                    for i in (saved_pc + code_len)..(i_ptr + 2) {
-                                                        ir_stack[i] = OptInstruction::Nop;
-                                                    }
-                                                    // insert zero clear instruction
-                                                    ir_stack[i_ptr + 2] = OptInstruction::ZeroClear;
-                                                    break;
+                                                    replaces.push((
+                                                        saved_pc..(i_ptr),
+                                                        code_lets.clone(),
+                                                    ));
                                                 }
                                             }
                                         }
@@ -228,17 +221,10 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                                                     && ir_stack[i_ptr + 1]
                                                         == OptInstruction::LoopEnd
                                                 {
-                                                    let code_len = code_lets.len();
-                                                    //insert moving add instruction
-                                                    for i in saved_pc..(saved_pc + code_len) {
-                                                        ir_stack[i] = code_lets.remove(0);
-                                                    }
-                                                    for i in (saved_pc + code_len)..(i_ptr + 2) {
-                                                        ir_stack[i] = OptInstruction::Nop;
-                                                    }
-                                                    // insert zero clear instruction
-                                                    ir_stack[i_ptr + 2] = OptInstruction::ZeroClear;
-                                                    break;
+                                                    replaces.push((
+                                                        saved_pc..(i_ptr),
+                                                        code_lets.clone(),
+                                                    ));
                                                 }
                                             }
                                         }
@@ -284,17 +270,10 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                                                     && ir_stack[i_ptr + 2]
                                                         == OptInstruction::LoopEnd
                                                 {
-                                                    let code_len = code_lets.len();
-                                                    //insert moving add instruction
-                                                    for i in saved_pc..(saved_pc + code_len) {
-                                                        ir_stack[i] = code_lets.remove(0);
-                                                    }
-                                                    for i in (saved_pc + code_len)..(i_ptr + 2) {
-                                                        ir_stack[i] = OptInstruction::Nop;
-                                                    }
-                                                    // insert zero clear instruction
-                                                    ir_stack[i_ptr + 2] = OptInstruction::ZeroClear;
-                                                    break;
+                                                    replaces.push((
+                                                        saved_pc..(i_ptr),
+                                                        code_lets.clone(),
+                                                    ));
                                                 }
                                             }
                                         }
@@ -305,17 +284,10 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                                                     && ir_stack[i_ptr + 2]
                                                         == OptInstruction::LoopEnd
                                                 {
-                                                    let code_len = code_lets.len();
-                                                    //insert moving add instruction
-                                                    for i in saved_pc..(saved_pc + code_len) {
-                                                        ir_stack[i] = code_lets.remove(0);
-                                                    }
-                                                    for i in (saved_pc + code_len)..(i_ptr + 2) {
-                                                        ir_stack[i] = OptInstruction::Nop;
-                                                    }
-                                                    // insert zero clear instruction
-                                                    ir_stack[i_ptr + 2] = OptInstruction::ZeroClear;
-                                                    break;
+                                                    replaces.push((
+                                                        saved_pc..(i_ptr),
+                                                        code_lets.clone(),
+                                                    ));
                                                 }
                                             }
                                         }
@@ -328,6 +300,22 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
             }
         }
         i_ptr += 1;
+    }
+    for (range, mut instructions) in replaces {
+        let code_len = instructions.len();
+        let saved_pc=range.start;
+        let end=range.end;
+
+        //insert moving add instruction
+        for i in saved_pc..(saved_pc + code_len) {
+            ir_stack[i] = instructions.remove(0);
+        }
+        for i in (saved_pc + code_len)..(end) {
+            ir_stack[i] = OptInstruction::Nop;
+        }
+        // insert zero clear instruction
+        ir_stack[end] = OptInstruction::ZeroClear;
+        break;
     }
     ir_stack
 }
