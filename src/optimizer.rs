@@ -169,143 +169,86 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
             _ => None,
         }
     }
-    while let Some(ir) = ir_stack.get(i_ptr) {
-        if *ir == OptInstruction::LoopStart {
-            let saved_pc = i_ptr;
-            i_ptr += 1;
-            if ir_stack[i_ptr] == OptInstruction::Sub(1) {
+
+    while let Some(start)=ir_stack.get(i_ptr){
+        // [
+        if *start==OptInstruction::LoopStart {
+            let saved_pc=i_ptr;
+            let next=ir_stack[i_ptr+1];
+            println!("{} : {:?}",i_ptr+1,next);
+            //-
+            if next==OptInstruction::Sub(1) {
                 loop {
-                    match ir {
-                        //(AddPtr(x) Add|Sub(const))
-                        AddPtr(offset) | SubPtr(offset) => {
-                            let dir = ptr_op_to_direction(*ir).unwrap();
-                            direction.replace(dir);
-                            match ir_stack[i_ptr + 1] {
-                                Add(x) | Sub(x) => {
-                                    code_lets.push(OptInstruction::MovingAdd(
-                                        dir,
-                                        *offset,
-                                        math_op_to_sign(ir_stack[i_ptr + 1]).unwrap(),
-                                        x,
-                                    ));
-                                    ptr_offsets += *offset;
-                                    i_ptr += 2;
-                                }
-                                _ => {
-                                    //give up optimize
-                                    continue;
+                    let pair = (ir_stack[i_ptr + 2], ir_stack[i_ptr + 3]);
+                    println!("{},{} {:?}",i_ptr+2,i_ptr+3,pair);
+                    match pair {
+                        (AddPtr(offset), Add(x)) => {
+                            ptr_offsets += offset;
+                            direction.replace(Direction::Right);
+                            code_lets.push(MovingAdd(Direction::Right, ptr_offsets, Sign::Plus, x));
+                        }
+                        (AddPtr(offset), Sub(x)) => {
+                            ptr_offsets += offset;
+                            direction.replace(Direction::Right);
+                            code_lets.push(MovingAdd(Direction::Right, ptr_offsets, Sign::Minus, x));
+                        }
+                        (SubPtr(offset), Add(x)) => {
+                            ptr_offsets += offset;
+                            direction.replace(Direction::Left);
+                            code_lets.push(MovingAdd(Direction::Left, ptr_offsets, Sign::Plus, x));
+                        }
+                        (SubPtr(offset), Sub(x)) => {
+                            ptr_offsets += offset;
+                            direction.replace(Direction::Left);
+                            code_lets.push(MovingAdd(Direction::Left, ptr_offsets, Sign::Minus, x));
+                        }
+                        //end loop
+                        (SubPtr(offset), LoopEnd) => {
+                            if let Some(Direction::Right) = direction {
+                                if offset == ptr_offsets {
+                                    replaces.push((saved_pc..i_ptr + 3, code_lets.clone()));
+                                    println!("emit {}..{} {:?}",saved_pc,i_ptr+3,code_lets);
+                                    i_ptr+=2;
+                                    ptr_offsets=0;
+                                    code_lets.clear();
+                                    break;
                                 }
                             }
                         }
-                        instruction => {
-                            //give up this optimize
-                            if ptr_offsets != 0 {
-                                if let Some(direction) = direction {
-                                    match direction {
-                                        Direction::Left => {
-                                            if let AddPtr(reverse) = instruction {
-                                                if ptr_offsets == *reverse
-                                                    && ir_stack[i_ptr + 1]
-                                                        == OptInstruction::LoopEnd
-                                                {
-                                                    replaces.push((
-                                                        saved_pc..(i_ptr),
-                                                        code_lets.clone(),
-                                                    ));
-                                                }
-                                            }
-                                        }
-                                        Direction::Right => {
-                                            if let SubPtr(reverse) = instruction {
-                                                if ptr_offsets == *reverse
-                                                    && ir_stack[i_ptr + 1]
-                                                        == OptInstruction::LoopEnd
-                                                {
-                                                    replaces.push((
-                                                        saved_pc..(i_ptr),
-                                                        code_lets.clone(),
-                                                    ));
-                                                }
-                                            }
-                                        }
-                                    }
+                        (AddPtr(offset), LoopEnd) => {
+                            if let Some(Direction::Left) = direction {
+                                if offset == ptr_offsets {
+                                    replaces.push((saved_pc..i_ptr + 3, code_lets.clone()));
+                                    println!("emit {}..{} {:?}",saved_pc,i_ptr+3,code_lets);
+                                    i_ptr+=2;
+                                    ptr_offsets=0;
+                                    code_lets.clear();
+                                    break;
                                 }
                             }
+                        }
+                        _ => {
+                            code_lets.clear();
+                            i_ptr+=2;
+                            ptr_offsets=0;
+                            break;
                         }
                     }
+                    i_ptr += 2;
                 }
-            } else {
-                loop {
-                    match ir {
-                        //(AddPtr(x) Add|Sub(const))
-                        AddPtr(offset) | SubPtr(offset) => {
-                            let dir = ptr_op_to_direction(*ir).unwrap();
-                            direction.replace(dir);
-                            match ir_stack[i_ptr + 1] {
-                                Add(x) | Sub(x) => {
-                                    code_lets.push(OptInstruction::MovingAdd(
-                                        dir,
-                                        *offset,
-                                        math_op_to_sign(ir_stack[i_ptr + 1]).unwrap(),
-                                        x,
-                                    ));
-                                    ptr_offsets += *offset;
-                                    i_ptr += 2;
-                                }
-                                _ => {
-                                    //give up optimize
-                                    continue;
-                                }
-                            }
-                        }
-                        instruction => {
-                            //give up this optimize
-                            if ptr_offsets != 0 {
-                                if let Some(direction) = direction {
-                                    match direction {
-                                        Direction::Left => {
-                                            if let AddPtr(reverse) = instruction {
-                                                if ptr_offsets == *reverse
-                                                    && ir_stack[i_ptr + 1] == Sub(1)
-                                                    && ir_stack[i_ptr + 2]
-                                                        == OptInstruction::LoopEnd
-                                                {
-                                                    replaces.push((
-                                                        saved_pc..(i_ptr),
-                                                        code_lets.clone(),
-                                                    ));
-                                                }
-                                            }
-                                        }
-                                        Direction::Right => {
-                                            if let SubPtr(reverse) = instruction {
-                                                if ptr_offsets == *reverse
-                                                    && ir_stack[i_ptr + 1] == Sub(1)
-                                                    && ir_stack[i_ptr + 2]
-                                                        == OptInstruction::LoopEnd
-                                                {
-                                                    replaces.push((
-                                                        saved_pc..(i_ptr),
-                                                        code_lets.clone(),
-                                                    ));
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            }else{
+                i_ptr+=1;
             }
+        }else{
+            i_ptr+=1;
         }
-        i_ptr += 1;
     }
+
     for (range, mut instructions) in replaces {
         let code_len = instructions.len();
-        let saved_pc=range.start;
-        let end=range.end;
-
+        let saved_pc = range.start;
+        let end = range.end;
+        println!("{}..{} : replace {:?}->{:?}",saved_pc,end,&ir_stack[saved_pc..(end+1)],instructions);
         //insert moving add instruction
         for i in saved_pc..(saved_pc + code_len) {
             ir_stack[i] = instructions.remove(0);
@@ -315,7 +258,6 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
         }
         // insert zero clear instruction
         ir_stack[end] = OptInstruction::ZeroClear;
-        break;
     }
     ir_stack
 }
