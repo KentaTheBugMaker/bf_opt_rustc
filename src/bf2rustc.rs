@@ -39,43 +39,70 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
                 "}\n".to_owned()
             }
             OptInstruction::ZeroClear => "mem[ptr] = 0;\n".to_owned(),
-            OptInstruction::MovingAdd(direction, offset, sign, multiplier) => match direction {
+            OptInstruction::MovingMultiplyAdd(direction, offset, sign, multiplier) => {
+                match direction {
+                    Direction::Left => match sign {
+                        Sign::Plus => {
+                            format!(
+                                "mem[ptr - {}] += mem[ptr].wrapping_mul({});\n",
+                                offset, multiplier
+                            )
+                        }
+                        Sign::Minus => {
+                            format!(
+                                "mem[ptr - {}] -= mem[ptr].wrapping_mul({});\n",
+                                offset, multiplier
+                            )
+                        }
+                    },
+                    Direction::Right => match sign {
+                        Sign::Plus => {
+                            format!(
+                                "mem[ptr + {}] += mem[ptr].wrapping_mul({});\n",
+                                offset, multiplier
+                            )
+                        }
+                        Sign::Minus => {
+                            format!(
+                                "mem[ptr + {}] -= mem[ptr].wrapping_mul({});\n",
+                                offset, multiplier
+                            )
+                        }
+                    },
+                }
+            }
+            OptInstruction::PtrMoveRight(x) => {
+                rust_code.push_str("while mem[ptr] != 0 {\n");
+                rust_code.push_str(&"\t".repeat(nest + 1));
+                rust_code.push_str(&format!("ptr += {};\n", x));
+                rust_code.push_str(&"\t".repeat(nest));
+                "}\n".to_owned()
+            }
+            OptInstruction::PtrMoveLeft(x) => {
+                rust_code.push_str("while mem[ptr] != 0 {\n");
+                rust_code.push_str(&"\t".repeat(nest + 1));
+                rust_code.push_str(&format!("ptr -= {};\n", x));
+                "}\n".to_owned()
+            }
+            OptInstruction::Nop | OptInstruction::OtherChar(_) => "".to_owned(),
+            OptInstruction::MovingAdd(direction, offset, sign) => match direction {
                 Direction::Left => match sign {
                     Sign::Plus => {
-                        format!(
-                            "mem[ptr - {}] += mem[ptr].wrapping_mul({});\n",
-                            offset, multiplier
-                        )
+                        format!("mem[ptr - {}] += mem[ptr];\n", offset)
                     }
                     Sign::Minus => {
-                        format!(
-                            "mem[ptr - {}] -= mem[ptr].wrapping_mul({});\n",
-                            offset, multiplier
-                        )
+                        format!("mem[ptr - {}] -= mem[ptr];\n", offset)
                     }
                 },
                 Direction::Right => match sign {
                     Sign::Plus => {
-                        format!(
-                            "mem[ptr + {}] += mem[ptr].wrapping_mul({});\n",
-                            offset, multiplier
-                        )
+                        format!("mem[ptr + {}] += mem[ptr];\n", offset)
                     }
                     Sign::Minus => {
-                        format!(
-                            "mem[ptr + {}] -= mem[ptr].wrapping_mul({});\n",
-                            offset, multiplier
-                        )
+                        format!("mem[ptr + {}] -= mem[ptr];\n", offset)
                     }
                 },
             },
-            OptInstruction::PtrMoveRight(x) => {
-                format!("while mem[ptr] != 0 {{ ptr += {};}}\n", x)
-            }
-            OptInstruction::PtrMoveLeft(x) => {
-                format!("while mem[ptr] != 0 {{ ptr -= {};}}\n", x)
-            }
-            OptInstruction::Nop | OptInstruction::OtherChar(_) => "".to_owned(),
         };
         rust_code.push_str(&code_let);
     }

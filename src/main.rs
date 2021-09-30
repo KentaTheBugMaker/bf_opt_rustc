@@ -3,7 +3,6 @@
 //! wrap around cell
 //! 8 bit cell
 //!
-use crate::optimizer::OptLevel;
 use crate::parser::src_to_ir;
 use std::ops::Deref;
 use std::time::Instant;
@@ -21,7 +20,7 @@ static BENCH_DATA: once_cell::sync::Lazy<Vec<u8>> = once_cell::sync::Lazy::new(|
     bench_data = bench_data.replace("\r\n", "\n");
     bench_data.into_bytes()
 });
-const CODE: &'static str = include_str!("../factor.b");
+const CODE: &str = include_str!("../factor.b");
 fn main() {
     let bf_ir = src_to_ir(CODE);
     //let formatted_code = formatter::brain_fuck_fmt(CODE);
@@ -74,12 +73,9 @@ fn main() {
         instant.elapsed()
     );
 
-    let data_move_opt = optimizer::pass_generic_data_move(ptr_move_opt.clone());
+    let data_move_opt = optimizer::pass_generic_data_move(ptr_move_opt);
     let data_move_opt = optimizer::pass_nop_remove(data_move_opt);
-    /*
-    for (i, (ir, un_optimized)) in data_move_opt.iter().zip(ptr_move_opt.iter()).enumerate() {
-        println!("{} : {:?} {:?}", i, ir, un_optimized);
-    }*/
+
     let instant = Instant::now();
     optimizer::exec_opt_ir(
         data_move_opt.clone(),
@@ -91,9 +87,21 @@ fn main() {
         "[->+<] data moving add optimization {:?}",
         instant.elapsed()
     );
-    let rust_code = bf2rustc::emit_rust_code(&data_move_opt);
+
+    let moving_add_opt = optimizer::pass_moving_add_specialization(data_move_opt);
+    let moving_add_opt = optimizer::pass_nop_remove(moving_add_opt);
+
+    let instant = Instant::now();
+    optimizer::exec_opt_ir(
+        moving_add_opt.clone(),
+        BENCH_DATA.deref().as_slice(),
+        std::io::stdout(),
+        false,
+    );
+    println!(" moving add opt {:?}", instant.elapsed());
+    let rust_code = bf2rustc::emit_rust_code(&moving_add_opt);
     println!("{}", rust_code);
-    let jump_calc = optimizer::pass_jump_calc(data_move_opt);
+    let jump_calc = optimizer::pass_jump_calc(moving_add_opt);
     let instant = Instant::now();
     optimizer::exec_opt_ir(
         jump_calc.clone(),
@@ -105,6 +113,7 @@ fn main() {
         " [ ] compile time jump address calculation {:?}",
         instant.elapsed()
     );
+    optimizer::pass_pointer_propagation(jump_calc);
     let instant = Instant::now();
     optimized_rust_code_factor::bf_main(BENCH_DATA.deref().as_slice(), std::io::stdout());
     println!("native code from data moving {:?}", instant.elapsed());

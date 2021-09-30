@@ -1,6 +1,6 @@
 use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingAdd, Nop, OtherChar, Read, Sub, SubPtr, Write,
-    ZeroClear, JZ,
+    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingMultiplyAdd, Nop, OtherChar, Read, Sub, SubPtr,
+    Write, ZeroClear, JZ,
 };
 use crate::parser::BFInstruction;
 use std::option::Option::Some;
@@ -32,7 +32,8 @@ pub enum OptInstruction {
     ZeroClear,
     //[-<+>] [-<->] [->+<] [->-<]
     //direction offset sign multiplier
-    MovingAdd(Direction, usize, Sign, u8),
+    MovingMultiplyAdd(Direction, usize, Sign, u8),
+    MovingAdd(Direction, usize, Sign),
     //[AddPtr]
     PtrMoveRight(usize),
     //[SubPtr]
@@ -151,21 +152,6 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
     let mut replaces = Vec::new();
     let mut ptr_offsets = 0;
     let mut direction = None;
-    fn ptr_op_to_direction(op: OptInstruction) -> Option<Direction> {
-        match op {
-            AddPtr(_) => Some(Direction::Right),
-            SubPtr(_) => Some(Direction::Left),
-            _ => None,
-        }
-    }
-    fn math_op_to_sign(op: OptInstruction) -> Option<Sign> {
-        match op {
-            Add(_) => Some(Sign::Plus),
-            Sub(_) => Some(Sign::Minus),
-            _ => None,
-        }
-    }
-
     while let Some(start) = ir_stack.get(i_ptr) {
         // [
         if *start == OptInstruction::LoopStart {
@@ -176,17 +162,22 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
             if next == OptInstruction::Sub(1) {
                 loop {
                     let pair = (ir_stack[i_ptr + 2], ir_stack[i_ptr + 3]);
-                    println!("{},{} {:?}", i_ptr + 2, i_ptr + 3, pair);
+                    //println!("{},{} {:?}", i_ptr + 2, i_ptr + 3, pair);
                     match pair {
                         (AddPtr(offset), Add(x)) => {
                             ptr_offsets += offset;
                             direction.replace(Direction::Right);
-                            code_lets.push(MovingAdd(Direction::Right, ptr_offsets, Sign::Plus, x));
+                            code_lets.push(MovingMultiplyAdd(
+                                Direction::Right,
+                                ptr_offsets,
+                                Sign::Plus,
+                                x,
+                            ));
                         }
                         (AddPtr(offset), Sub(x)) => {
                             ptr_offsets += offset;
                             direction.replace(Direction::Right);
-                            code_lets.push(MovingAdd(
+                            code_lets.push(MovingMultiplyAdd(
                                 Direction::Right,
                                 ptr_offsets,
                                 Sign::Minus,
@@ -196,12 +187,22 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                         (SubPtr(offset), Add(x)) => {
                             ptr_offsets += offset;
                             direction.replace(Direction::Left);
-                            code_lets.push(MovingAdd(Direction::Left, ptr_offsets, Sign::Plus, x));
+                            code_lets.push(MovingMultiplyAdd(
+                                Direction::Left,
+                                ptr_offsets,
+                                Sign::Plus,
+                                x,
+                            ));
                         }
                         (SubPtr(offset), Sub(x)) => {
                             ptr_offsets += offset;
                             direction.replace(Direction::Left);
-                            code_lets.push(MovingAdd(Direction::Left, ptr_offsets, Sign::Minus, x));
+                            code_lets.push(MovingMultiplyAdd(
+                                Direction::Left,
+                                ptr_offsets,
+                                Sign::Minus,
+                                x,
+                            ));
                         }
                         //end loop
                         (SubPtr(offset), LoopEnd) => {
@@ -258,19 +259,95 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
             instructions
         );*/
         //insert moving add instruction
+        /*
         for i in saved_pc..(saved_pc + code_len) {
             ir_stack[i] = instructions.remove(0);
+        }*/
+        for ir in ir_stack.iter_mut().skip(saved_pc).take(code_len){
+            *ir=instructions.remove(0);
         }
+        for ir in ir_stack.iter_mut().take(end).skip(saved_pc+code_len){
+            *ir=Nop;
+        }
+        /*
         for i in (saved_pc + code_len)..(end) {
             ir_stack[i] = OptInstruction::Nop;
-        }
+        }*/
         // insert zero clear instruction
         ir_stack[end] = OptInstruction::ZeroClear;
     }
     ir_stack
 }
-/// pointer propagation
-pub fn pass_pointer_propagation(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+///remove unneeded multiply
+pub fn pass_moving_add_specialization(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    ir_stack
+        .iter()
+        .map(|ir| {
+            if let OptInstruction::MovingMultiplyAdd(direction, offset, sign, 1) = ir {
+                OptInstruction::MovingAdd(*direction, *offset, *sign)
+            } else {
+                *ir
+            }
+        })
+        .collect()
+}
+/// this eliminate ZeroClear by following conditions
+/// PtrMoveLeft()->ZeroClear
+/// PtrMoveRight()->ZeroClear
+/// ZeroClear->ZeroClear
+pub fn pass_remove_already_cleared(mut ir_stack:Vec<OptInstruction>)->Vec<OptInstruction>{
+    let mut replaces=vec![];
+    for i in 0..(ir_stack.len()-1){
+        let prev_i=ir_stack[i];
+        let instruction=ir_stack[i+1];
+            if (prev_i == instruction
+                && prev_i==OptInstruction::ZeroClear ) || matches!(prev_i,OptInstruction::PtrMoveLeft(_)|OptInstruction::PtrMoveRight(_)) {
+                replaces.push(i+1);
+            }
+    }
+    for i in replaces{
+        ir_stack[i]=OptInstruction::Nop;
+    }
+    ir_stack
+}
+/// pointer propagation (not implemented)
+/// this observe pointer fixed location
+pub fn pass_pointer_propagation(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    //initialize d_ptr
+    let mut current_d_ptr:Option<isize>=Some(0);
+    //
+    let mut is_in_loop =false;
+    for (i,ir) in ir_stack.iter().enumerate(){
+        println!("i_ptr {} ir {:?} d_ptr {:?}",i,ir,current_d_ptr);
+        match *ir {
+            Add(_) => {}
+            Sub(_) => {}
+            AddPtr(x) => {
+                if let Some(ref mut  ptr)= current_d_ptr{
+                    *ptr+=x as isize;
+                }
+                }
+            SubPtr(x) => {
+                if let Some(ref mut  ptr)= current_d_ptr{
+                    *ptr-=x as isize;
+                }
+            }
+            JZ(_) => {is_in_loop=true;}
+            Jnz(_) => {is_in_loop=false;}
+            LoopStart => {is_in_loop=true;}
+            LoopEnd => {is_in_loop=false;}
+            //these ir does not affect to pointer is fixed value
+            Read => {}
+            Write => {}
+            ZeroClear => {}
+            MovingMultiplyAdd(_, _, _, _) => {}
+            OptInstruction::MovingAdd(_, _, _) => {}
+            // these ir affect to pointer
+            OptInstruction::PtrMoveRight(_) => {current_d_ptr=None;}
+            OptInstruction::PtrMoveLeft(_) => {current_d_ptr=None;}
+            _=>{}
+        }
+    }
     ir_stack
 }
 /// remove nop
@@ -352,8 +429,8 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
         let op_code = program.get(instruction_ptr);
         if debug {
             println!(
-                "i_ptr {} i {:?} d_ptr {} ",
-                instruction_ptr, op_code, data_ptr
+                "i_ptr {} i {:?} d_ptr {} cell_value {}",
+                instruction_ptr, op_code, data_ptr,mem[data_ptr]
             );
         }
         if let Some(op_code) = op_code {
@@ -423,7 +500,7 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                     }
                 }
 
-                MovingAdd(direction, offset, sign, multiplier) => match direction {
+                MovingMultiplyAdd(direction, offset, sign, multiplier) => match direction {
                     Direction::Left => match sign {
                         Sign::Plus => {
                             mem[data_ptr - *offset] += mem[data_ptr].wrapping_mul(*multiplier);
@@ -438,6 +515,24 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                         }
                         Sign::Minus => {
                             mem[data_ptr + *offset] -= mem[data_ptr].wrapping_mul(*multiplier);
+                        }
+                    },
+                },
+                OptInstruction::MovingAdd(direction, offset, sign) => match direction {
+                    Direction::Left => match sign {
+                        Sign::Plus => {
+                            mem[data_ptr - *offset] += mem[data_ptr];
+                        }
+                        Sign::Minus => {
+                            mem[data_ptr - *offset] -= mem[data_ptr];
+                        }
+                    },
+                    Direction::Right => match sign {
+                        Sign::Plus => {
+                            mem[data_ptr + *offset] += mem[data_ptr];
+                        }
+                        Sign::Minus => {
+                            mem[data_ptr + *offset] -= mem[data_ptr];
                         }
                     },
                 },
