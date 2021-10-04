@@ -3,6 +3,7 @@
 //! wrap around cell
 //! 8 bit cell
 //!
+use crate::optimizer::OptInstruction;
 use crate::parser::src_to_ir;
 use std::ops::Deref;
 use std::time::Instant;
@@ -21,99 +22,74 @@ static BENCH_DATA: once_cell::sync::Lazy<Vec<u8>> = once_cell::sync::Lazy::new(|
     bench_data.into_bytes()
 });
 const CODE: &str = include_str!("../factor.b");
+fn estimate_performance(opt_ir: Vec<OptInstruction>, message: &str) {
+    let instant = Instant::now();
+    optimizer::exec_opt_ir(
+        opt_ir,
+        BENCH_DATA.deref().as_slice(),
+        std::io::stdout(),
+        false,
+    );
+    println!("{} {:?}", message, instant.elapsed());
+}
 fn main() {
     let bf_ir = src_to_ir(CODE);
     //let formatted_code = formatter::brain_fuck_fmt(CODE);
     //println!("{}", formatted_code);
-
-    let mut vm = interpreter::Interpreter::load_program(
-        bf_ir.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-    );
-    let instant = Instant::now();
-    vm.exec_program();
-    println!(
-        "Non optimized reference interpreter {:?}",
-        instant.elapsed()
-    );
+    /*
+        let mut vm = interpreter::Interpreter::load_program(
+            bf_ir.clone(),
+            BENCH_DATA.deref().as_slice(),
+            std::io::stdout(),
+        );
+        let instant = Instant::now();
+        vm.exec_program();
+        println!(
+            "Non optimized reference interpreter {:?}",
+            instant.elapsed()
+        );
+    */
 
     let inc_dec_opt = optimizer::pass_inc_dec_opt(&bf_ir);
-    let instant = Instant::now();
-    optimizer::exec_opt_ir(
-        inc_dec_opt.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-        false,
-    );
-    println!("++ -- >> << Inc Dec optimization {:?}", instant.elapsed());
+
+    estimate_performance(inc_dec_opt.clone(), "++ -- >> << Inc Dec optimization");
 
     let zero_clear_opt = optimizer::pass_zero_clear(inc_dec_opt);
     let zero_clear_opt = optimizer::pass_nop_remove(zero_clear_opt);
-    let instant = Instant::now();
-    optimizer::exec_opt_ir(
-        zero_clear_opt.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-        false,
-    );
-    println!("[-] 0 clear idiom optimization {:?}", instant.elapsed());
+
+    estimate_performance(zero_clear_opt.clone(), "[-] zero clear optimization");
 
     let ptr_move_opt = optimizer::pass_ptr_move(zero_clear_opt);
     let ptr_move_opt = optimizer::pass_nop_remove(ptr_move_opt);
-    let instant = Instant::now();
-    optimizer::exec_opt_ir(
-        ptr_move_opt.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-        false,
-    );
-    println!(
-        "[>>] 0 cell search by constant stride optimization {:?}",
-        instant.elapsed()
-    );
+
+    estimate_performance(ptr_move_opt.clone(), "[>] seek to 0 cell by given stride ");
 
     let data_move_opt = optimizer::pass_generic_data_move(ptr_move_opt);
     let data_move_opt = optimizer::pass_nop_remove(data_move_opt);
 
-    let instant = Instant::now();
-    optimizer::exec_opt_ir(
-        data_move_opt.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-        false,
-    );
-    println!(
-        "[->+<] data moving add optimization {:?}",
-        instant.elapsed()
-    );
+    estimate_performance(data_move_opt.clone(), "[-<++>] data move opt");
 
     let moving_add_opt = optimizer::pass_moving_add_specialization(data_move_opt);
     let moving_add_opt = optimizer::pass_nop_remove(moving_add_opt);
 
-    let instant = Instant::now();
-    optimizer::exec_opt_ir(
+    estimate_performance(
         moving_add_opt.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-        false,
+        "[-<+>] specialize data move opt when multiplier = 1",
     );
-    println!(" moving add opt {:?}", instant.elapsed());
-    let rust_code = bf2rustc::emit_rust_code(&moving_add_opt);
-    println!("{}", rust_code);
+    //let rust_code = bf2rustc::emit_rust_code(&zero_clear_opt);
+    //println!("{}", rust_code);
     let jump_calc = optimizer::pass_jump_calc(moving_add_opt);
-    let instant = Instant::now();
-    optimizer::exec_opt_ir(
-        jump_calc.clone(),
-        BENCH_DATA.deref().as_slice(),
-        std::io::stdout(),
-        false,
-    );
-    println!(
-        " [ ] compile time jump address calculation {:?}",
-        instant.elapsed()
-    );
-    optimizer::pass_pointer_propagation(jump_calc);
+
+    estimate_performance(jump_calc.clone(), "compile time jump address calculation");
+    let set_after_set = optimizer::pass_remove_already_cleared(jump_calc);
+
+    let set_after_set = optimizer::pass_nop_remove(set_after_set);
+    let set_after_set = optimizer::pass_recalculate_jump_address(set_after_set);
+    //println!("{:?}", set_after_set);
+    //let rust_code = bf2rustc::emit_rust_code(&set_after_set);
+    //println!("{}", rust_code);
+    estimate_performance(set_after_set, "set after set ");
+
     let instant = Instant::now();
     optimized_rust_code_factor::bf_main(BENCH_DATA.deref().as_slice(), std::io::stdout());
     println!("native code from data moving {:?}", instant.elapsed());

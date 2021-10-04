@@ -13,10 +13,10 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
                 format!("mem[ptr] = mem[ptr].wrapping_sub({});\n", x)
             }
             OptInstruction::AddPtr(x) => {
-                format!("ptr = ptr.wrapping_add({});\n", x)
+                format!("ptr += {};\n", x)
             }
             OptInstruction::SubPtr(x) => {
-                format!("ptr = ptr.wrapping_sub({});\n", x)
+                format!("ptr -= {};\n", x)
             }
             OptInstruction::JZ(_) => {
                 nest += 1;
@@ -38,7 +38,6 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
                 nest -= 1;
                 "}\n".to_owned()
             }
-            OptInstruction::ZeroClear => "mem[ptr] = 0;\n".to_owned(),
             OptInstruction::MovingMultiplyAdd(direction, offset, sign, multiplier) => {
                 match direction {
                     Direction::Left => match sign {
@@ -103,6 +102,9 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
                     }
                 },
             },
+            OptInstruction::Set(x) => {
+                format!("mem[ptr] = {};\n", x)
+            }
         };
         rust_code.push_str(&code_let);
     }

@@ -1,6 +1,6 @@
 use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingMultiplyAdd, Nop, OtherChar, Read, Sub, SubPtr,
-    Write, ZeroClear, JZ,
+    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingMultiplyAdd, Nop, OtherChar, Read, Set, Sub,
+    SubPtr, Write, JZ,
 };
 use crate::parser::BFInstruction;
 use std::option::Option::Some;
@@ -29,7 +29,7 @@ pub enum OptInstruction {
     LoopStart,
     LoopEnd,
     //[-]
-    ZeroClear,
+    Set(u8),
     //[-<+>] [-<->] [->+<] [->-<]
     //direction offset sign multiplier
     MovingMultiplyAdd(Direction, usize, Sign, u8),
@@ -106,12 +106,12 @@ pub fn pass_zero_clear(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction>
     if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
             if ir_stack[i] == LoopStart && ir_stack[i + 1] == Sub(1) && ir_stack[i + 2] == LoopEnd {
-                ir_stack[i] = ZeroClear;
+                ir_stack[i] = Set(0);
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
             }
             if ir_stack[i] == LoopStart && ir_stack[i + 1] == Add(1) && ir_stack[i + 2] == LoopEnd {
-                ir_stack[i] = ZeroClear;
+                ir_stack[i] = Set(0);
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
             }
@@ -263,18 +263,18 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
         for i in saved_pc..(saved_pc + code_len) {
             ir_stack[i] = instructions.remove(0);
         }*/
-        for ir in ir_stack.iter_mut().skip(saved_pc).take(code_len){
-            *ir=instructions.remove(0);
+        for ir in ir_stack.iter_mut().skip(saved_pc).take(code_len) {
+            *ir = instructions.remove(0);
         }
-        for ir in ir_stack.iter_mut().take(end).skip(saved_pc+code_len){
-            *ir=Nop;
+        for ir in ir_stack.iter_mut().take(end).skip(saved_pc + code_len) {
+            *ir = Nop;
         }
         /*
         for i in (saved_pc + code_len)..(end) {
             ir_stack[i] = OptInstruction::Nop;
         }*/
         // insert zero clear instruction
-        ir_stack[end] = OptInstruction::ZeroClear;
+        ir_stack[end] = OptInstruction::Set(0);
     }
     ir_stack
 }
@@ -291,65 +291,50 @@ pub fn pass_moving_add_specialization(ir_stack: Vec<OptInstruction>) -> Vec<OptI
         })
         .collect()
 }
-/// this eliminate ZeroClear by following conditions
-/// PtrMoveLeft()->ZeroClear
-/// PtrMoveRight()->ZeroClear
-/// ZeroClear->ZeroClear
-pub fn pass_remove_already_cleared(mut ir_stack:Vec<OptInstruction>)->Vec<OptInstruction>{
-    let mut replaces=vec![];
-    for i in 0..(ir_stack.len()-1){
-        let prev_i=ir_stack[i];
-        let instruction=ir_stack[i+1];
-            if (prev_i == instruction
-                && prev_i==OptInstruction::ZeroClear ) || matches!(prev_i,OptInstruction::PtrMoveLeft(_)|OptInstruction::PtrMoveRight(_)) {
-                replaces.push(i+1);
-            }
-    }
-    for i in replaces{
-        ir_stack[i]=OptInstruction::Nop;
-    }
-    ir_stack
-}
-/// pointer propagation (not implemented)
-/// this observe pointer fixed location
-pub fn pass_pointer_propagation(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
-    //initialize d_ptr
-    let mut current_d_ptr:Option<isize>=Some(0);
-    //
-    let mut is_in_loop =false;
-    for (i,ir) in ir_stack.iter().enumerate(){
-        println!("i_ptr {} ir {:?} d_ptr {:?}",i,ir,current_d_ptr);
-        match *ir {
-            Add(_) => {}
-            Sub(_) => {}
-            AddPtr(x) => {
-                if let Some(ref mut  ptr)= current_d_ptr{
-                    *ptr+=x as isize;
-                }
-                }
-            SubPtr(x) => {
-                if let Some(ref mut  ptr)= current_d_ptr{
-                    *ptr-=x as isize;
-                }
-            }
-            JZ(_) => {is_in_loop=true;}
-            Jnz(_) => {is_in_loop=false;}
-            LoopStart => {is_in_loop=true;}
-            LoopEnd => {is_in_loop=false;}
-            //these ir does not affect to pointer is fixed value
-            Read => {}
-            Write => {}
-            ZeroClear => {}
-            MovingMultiplyAdd(_, _, _, _) => {}
-            OptInstruction::MovingAdd(_, _, _) => {}
-            // these ir affect to pointer
-            OptInstruction::PtrMoveRight(_) => {current_d_ptr=None;}
-            OptInstruction::PtrMoveLeft(_) => {current_d_ptr=None;}
-            _=>{}
+/// this eliminate Set by following conditions
+/// PtrMoveLeft()->Set(0)
+/// PtrMoveRight()->Set(0)
+/// Add(any)->Set(any)
+/// Sub(any)->Set(any)
+/// Set(any)->Set(any)
+pub fn pass_remove_already_cleared(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    let mut replaces = vec![];
+    for i in 0..(ir_stack.len() - 1) {
+        let prev_i = ir_stack[i];
+        let instruction = ir_stack[i + 1];
+        if matches!(
+            prev_i,
+            OptInstruction::PtrMoveLeft(_) | OptInstruction::PtrMoveRight(_)
+        ) && instruction == OptInstruction::Set(0)
+        {
+            replaces.push(i + 1);
+            println!("dead code at {}", i + 1);
+        } else if let (OptInstruction::Set(_), OptInstruction::Set(_)) = (prev_i, instruction) {
+            println!("dead code at {}", i);
+            replaces.push(i);
+        } else if let (OptInstruction::Add(_), OptInstruction::Set(_)) = (prev_i, instruction) {
+            println!("dead code at {}", i);
+            replaces.push(i);
+        } else if let (OptInstruction::Sub(_), OptInstruction::Set(_)) = (prev_i, instruction) {
+            println!("dead code at {}", i);
+            replaces.push(i);
+        } else if let (OptInstruction::Set(_), OptInstruction::Read) = (prev_i, instruction) {
+            println!("dead code at {}", i);
+            replaces.push(i);
+        } else if let (OptInstruction::Add(_), OptInstruction::Read) = (prev_i, instruction) {
+            println!("dead code at {}", i);
+            replaces.push(i);
+        } else if let (OptInstruction::Sub(_), OptInstruction::Read) = (prev_i, instruction) {
+            println!("dead code at {}", i);
+            replaces.push(i);
         }
     }
+    for i in replaces {
+        ir_stack[i] = OptInstruction::Nop;
+    }
     ir_stack
 }
+
 /// remove nop
 pub fn pass_nop_remove(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     ir_stack
@@ -383,6 +368,46 @@ pub fn pass_jump_calc(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> 
     }
     ir_stack
 }
+pub fn pass_un_optimize_jump_address(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    ir_stack
+        .iter()
+        .map(|x| match x {
+            JZ(_) => OptInstruction::LoopStart,
+            Jnz(_) => OptInstruction::LoopEnd,
+            x => *x,
+        })
+        .collect()
+}
+pub fn pass_recalculate_jump_address(ir: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    let new_ir = pass_un_optimize_jump_address(ir);
+    pass_jump_calc(new_ir)
+}
+///  remove JZ Jnz after ZeroClear
+/// install after jump address calc
+pub fn pass_jump_after_zero_clear(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
+    let mut replaces = Vec::new();
+    let mut i = 0;
+    while i + 1 < ir_stack.len() {
+        let prev_i = ir_stack[i];
+        let instruction = ir_stack[i + 1];
+        if prev_i == OptInstruction::Set(0) {
+            if let OptInstruction::JZ(x) = instruction {
+                println!("dead_code detected at {}", i + 1);
+                replaces.push((i + 1)..(x));
+                i = x;
+            }
+        }
+        i += 1;
+    }
+
+    for i in replaces {
+        for ir in ir_stack.iter_mut().take(i.end).skip(i.start) {
+            *ir = OptInstruction::Nop;
+        }
+    }
+    ir_stack
+}
+
 pub fn optimize(program: &[BFInstruction], opt_level: OptLevel) -> Vec<OptInstruction> {
     let mut ir_stack = pass_inc_dec_opt(program);
     if opt_level == OptLevel::IncDecOpt1 {
@@ -430,7 +455,7 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
         if debug {
             println!(
                 "i_ptr {} i {:?} d_ptr {} cell_value {}",
-                instruction_ptr, op_code, data_ptr,mem[data_ptr]
+                instruction_ptr, op_code, data_ptr, mem[data_ptr]
             );
         }
         if let Some(op_code) = op_code {
@@ -485,9 +510,7 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                         instruction_ptr = *x;
                     }
                 }
-                ZeroClear => {
-                    mem[data_ptr] = 0;
-                }
+
                 Nop | OtherChar(_) => {}
                 OptInstruction::PtrMoveRight(x) => {
                     while mem[data_ptr] != 0 {
@@ -536,6 +559,9 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                         }
                     },
                 },
+                OptInstruction::Set(x) => {
+                    mem[data_ptr] = *x;
+                }
             }
             // if overflow detected dump all memory to std out
             // one line per 16 byte display
