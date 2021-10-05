@@ -85,14 +85,27 @@ fn main() {
 
     let set_after_set = optimizer::pass_nop_remove(set_after_set);
     let set_after_set = optimizer::pass_recalculate_jump_address(set_after_set);
-    //println!("{:?}", set_after_set);
-    //let rust_code = bf2rustc::emit_rust_code(&set_after_set);
+
+    estimate_performance(set_after_set.clone(), "set after set ");
+
+    let add_after_set=optimizer::pass_add_after_set(set_after_set);
+    let add_after_set=optimizer::pass_nop_remove(add_after_set);
+    let add_after_set=optimizer::pass_recalculate_jump_address(add_after_set);
+
+
+
+    estimate_performance(add_after_set.clone(),"add after set");
+    // while if specialization
+    //let un_optimize=optimizer::pass_un_optimize_jump_address(add_after_set);
+    //let while_to_if=optimizer::pass_specialize_while_to_if(un_optimize);
+    //let while_to_if =optimizer::pass_nop_remove(while_to_if);
+
+    //let rust_code = bf2rustc::emit_rust_code(&while_to_if);
     //println!("{}", rust_code);
-    estimate_performance(set_after_set, "set after set ");
 
     let instant = Instant::now();
     optimized_rust_code_factor::bf_main(BENCH_DATA.deref().as_slice(), std::io::stdout());
-    println!("native code from data moving {:?}", instant.elapsed());
+    println!("native code from if specialization {:?}", instant.elapsed());
 }
 
 #[cfg(test)]

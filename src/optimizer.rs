@@ -1,7 +1,4 @@
-use crate::optimizer::OptInstruction::{
-    Add, AddPtr, Jnz, LoopEnd, LoopStart, MovingMultiplyAdd, Nop, OtherChar, Read, Set, Sub,
-    SubPtr, Write, JZ,
-};
+use crate::optimizer::OptInstruction::{Add, AddPtr, Jnz, WhileEnd, WhileStart, MovingMultiplyAdd, Nop, OtherChar, Read, Set, Sub, SubPtr, Write, JZ, IFStart, IFEnd};
 use crate::parser::BFInstruction;
 use std::option::Option::Some;
 
@@ -26,8 +23,11 @@ pub enum OptInstruction {
     Read,
     Write,
     //temporally use
-    LoopStart,
-    LoopEnd,
+    WhileStart,
+    WhileEnd,
+    //
+    IFStart,
+    IFEnd,
     //[-]
     Set(u8),
     //[-<+>] [-<->] [->+<] [->-<]
@@ -68,8 +68,8 @@ pub fn pass_inc_dec_opt(program: &[BFInstruction]) -> Vec<OptInstruction> {
             BFInstruction::Dec => Sub(burst_len as u8),
             BFInstruction::Read => Read,
             BFInstruction::Write => Write,
-            BFInstruction::LoopStart => LoopStart,
-            BFInstruction::LoopEnd => LoopEnd,
+            BFInstruction::LoopStart => WhileStart,
+            BFInstruction::LoopEnd => WhileEnd,
         }
     }
     for instruction in program {
@@ -105,12 +105,12 @@ pub fn pass_zero_clear(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction>
     //opt [-] [+]
     if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
-            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Sub(1) && ir_stack[i + 2] == LoopEnd {
+            if ir_stack[i] == WhileStart && ir_stack[i + 1] == Sub(1) && ir_stack[i + 2] == WhileEnd {
                 ir_stack[i] = Set(0);
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
             }
-            if ir_stack[i] == LoopStart && ir_stack[i + 1] == Add(1) && ir_stack[i + 2] == LoopEnd {
+            if ir_stack[i] == WhileStart && ir_stack[i + 1] == Add(1) && ir_stack[i + 2] == WhileEnd {
                 ir_stack[i] = Set(0);
                 ir_stack[i + 1] = Nop;
                 ir_stack[i + 2] = Nop;
@@ -123,7 +123,7 @@ pub fn pass_zero_clear(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction>
 pub fn pass_ptr_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     if ir_stack.len() > 2 {
         for i in 0..(ir_stack.len() - 2) {
-            if ir_stack[i] == LoopStart && ir_stack[i + 2] == LoopEnd {
+            if ir_stack[i] == WhileStart && ir_stack[i + 2] == WhileEnd {
                 match ir_stack[i + 1] {
                     AddPtr(x) => ir_stack[i + 1] = OptInstruction::PtrMoveRight(x),
                     SubPtr(x) => ir_stack[i + 1] = OptInstruction::PtrMoveLeft(x),
@@ -154,7 +154,7 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
     let mut direction = None;
     while let Some(start) = ir_stack.get(i_ptr) {
         // [
-        if *start == OptInstruction::LoopStart {
+        if *start == OptInstruction::WhileStart {
             let saved_pc = i_ptr;
             let next = ir_stack[i_ptr + 1];
             //println!("{} : {:?}", i_ptr + 1, next);
@@ -205,7 +205,7 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                             ));
                         }
                         //end loop
-                        (SubPtr(offset), LoopEnd) => {
+                        (SubPtr(offset), WhileEnd) => {
                             if let Some(Direction::Right) = direction {
                                 if offset == ptr_offsets {
                                     replaces.push((saved_pc..i_ptr + 3, code_lets.clone()));
@@ -217,7 +217,7 @@ pub fn pass_generic_data_move(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstr
                                 }
                             }
                         }
-                        (AddPtr(offset), LoopEnd) => {
+                        (AddPtr(offset), WhileEnd) => {
                             if let Some(Direction::Left) = direction {
                                 if offset == ptr_offsets {
                                     replaces.push((saved_pc..i_ptr + 3, code_lets.clone()));
@@ -291,12 +291,86 @@ pub fn pass_moving_add_specialization(ir_stack: Vec<OptInstruction>) -> Vec<OptI
         })
         .collect()
 }
+/// this pass make op fusion
+/// Set(x) Add(y) =>Set(x+y)
+/// Set(x) Sub(y) =>Set(x-y)
+///
+pub fn pass_add_after_set(mut ir_stack:Vec<OptInstruction>) ->Vec<OptInstruction>{
+    for i in 0..(ir_stack.len()-1) {
+        let prev_i=ir_stack[i];
+        let ir=ir_stack[i+1];
+        match (prev_i,ir){
+            (OptInstruction::Set(x),Add(y))=>{
+            println!("fusion this ir {:?} {:?}",prev_i,ir);
+                ir_stack[i+1]=Set(x.wrapping_add(y));
+                ir_stack[i]=OptInstruction::Nop
+            }
+            (OptInstruction::Set(x),Sub(y))=>{
+                println!("fusion this ir {:?} {:?}",prev_i,ir);
+                ir_stack[i+1]=Set(x.wrapping_sub(y));
+                ir_stack[i]=OptInstruction::Nop
+            }
+            _=>{}
+        }
+    }
+    ir_stack
+}
+/// specialize below stream.
+/// * WhileStart \[OPS] Set(0) WhileEnd =>IFStart \[OPS] IFEnd
+///
+/// installable to native code_gen only
+pub fn pass_specialize_while_to_if(mut ir_stack:Vec<OptInstruction>)->Vec<OptInstruction>{
+
+    for i in 0..(ir_stack.len()-1){
+        let prev_i=ir_stack[i];
+        let ir=ir_stack[i+1];
+        if let (OptInstruction::Set(0),OptInstruction::WhileEnd)=(prev_i,ir){
+            println!("IF idiom detected at {}..{}",i,i+1);
+            let mut instruction_ptr=i-1;
+
+            let mut depth = 1;
+            while depth != 0 {
+                instruction_ptr -= 1;
+                if let Some(ir) = ir_stack.get(instruction_ptr) {
+                    match ir {
+                        WhileStart => depth -= 1,
+                        WhileEnd => depth += 1,
+                        _ => {}
+                    }
+                }
+            }
+            ir_stack[instruction_ptr]=IFStart;
+            ir_stack[i]=Nop;
+            ir_stack[i+1]=IFEnd;
+        }
+    }
+    /*
+    let mut depth = 1;
+    if mem[data_ptr] != 0 {
+        while depth != 0 {
+            instruction_ptr -= 1;
+            if let Some(i) = program.get(instruction_ptr) {
+                match i {
+                    WhileStart => depth -= 1,
+                    WhileEnd => depth += 1,
+                    _ => {}
+                }
+            }
+        }
+    }
+    */
+    ir_stack
+}
 /// this eliminate Set by following conditions
-/// PtrMoveLeft()->Set(0)
-/// PtrMoveRight()->Set(0)
-/// Add(any)->Set(any)
-/// Sub(any)->Set(any)
-/// Set(any)->Set(any)
+/// * PtrMoveLeft()->Set(0)
+/// * PtrMoveRight()->Set(0)
+/// this eliminate previous ops by following conditions
+/// * Add(any)->Set(any)
+/// * Sub(any)->Set(any)
+/// * Set(any)->Set(any)
+/// * Add(any)->Read
+/// * Sub(any)->Read
+/// * Set(any)->Read
 pub fn pass_remove_already_cleared(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     let mut replaces = vec![];
     for i in 0..(ir_stack.len() - 1) {
@@ -347,15 +421,15 @@ pub fn pass_nop_remove(ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
 pub fn pass_jump_calc(mut ir_stack: Vec<OptInstruction>) -> Vec<OptInstruction> {
     let mut i_ptr = 0;
     while let Some(ir) = ir_stack.get(i_ptr) {
-        if OptInstruction::LoopStart == *ir {
+        if OptInstruction::WhileStart == *ir {
             let mut depth = 1;
             let saved_i_ptr = i_ptr;
             while depth != 0 {
                 i_ptr += 1;
                 if let Some(i) = ir_stack.get(i_ptr) {
                     match i {
-                        LoopStart => depth += 1,
-                        LoopEnd => depth -= 1,
+                        WhileStart => depth += 1,
+                        WhileEnd => depth -= 1,
                         _ => {}
                     }
                 }
@@ -372,8 +446,8 @@ pub fn pass_un_optimize_jump_address(ir_stack: Vec<OptInstruction>) -> Vec<OptIn
     ir_stack
         .iter()
         .map(|x| match x {
-            JZ(_) => OptInstruction::LoopStart,
-            Jnz(_) => OptInstruction::LoopEnd,
+            JZ(_) => OptInstruction::WhileStart,
+            Jnz(_) => OptInstruction::WhileEnd,
             x => *x,
         })
         .collect()
@@ -466,30 +540,30 @@ pub fn exec_opt_ir<R: std::io::Read, W: std::io::Write>(
                 Write => {
                     writer.write_all(&mem[data_ptr..data_ptr + 1]).unwrap();
                 }
-                LoopStart => {
+                WhileStart|OptInstruction::IFStart => {
                     let mut depth = 1;
                     if mem[data_ptr] == 0 {
                         while depth != 0 {
                             instruction_ptr += 1;
                             if let Some(i) = program.get(instruction_ptr) {
                                 match i {
-                                    LoopStart => depth += 1,
-                                    LoopEnd => depth -= 1,
+                                    WhileStart => depth += 1,
+                                    WhileEnd => depth -= 1,
                                     _ => {}
                                 }
                             }
                         }
                     }
                 }
-                LoopEnd => {
+                WhileEnd|OptInstruction::IFEnd => {
                     let mut depth = 1;
                     if mem[data_ptr] != 0 {
                         while depth != 0 {
                             instruction_ptr -= 1;
                             if let Some(i) = program.get(instruction_ptr) {
                                 match i {
-                                    LoopStart => depth -= 1,
-                                    LoopEnd => depth += 1,
+                                    WhileStart => depth -= 1,
+                                    WhileEnd => depth += 1,
                                     _ => {}
                                 }
                             }

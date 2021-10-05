@@ -17,11 +17,11 @@ pub fn brain_fuck_fmt(source: &str) -> String {
             OptInstruction::SubPtr(x) => "<".repeat(*x),
             OptInstruction::Read => ",".to_owned(),
             OptInstruction::Write => ".".to_owned(),
-            OptInstruction::LoopStart => {
+            OptInstruction::WhileStart => {
                 nest += 1;
                 "[".to_owned()
             }
-            OptInstruction::LoopEnd => {
+            OptInstruction::WhileEnd => {
                 nest -= 1;
                 pop_tab = true;
                 "]".to_owned()

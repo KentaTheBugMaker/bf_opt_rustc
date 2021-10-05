@@ -1,7 +1,11 @@
-pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W) {
-    let mut mem: Vec<u8> = vec![0; 30000];
-    let mut ptr: usize = 0;
-    while mem[ptr] != 0 {}
+pub fn bf_main<R: std::io::Read, W: std::io::Write>(
+    mut reader: R,
+    mut writer: W,
+) {
+    let mut mem:Vec<u8> = vec![0;30000];
+    let mut ptr:usize = 0;
+    while mem[ptr] != 0 {
+    }
     ptr += 30;
     mem[ptr] = mem[ptr].wrapping_sub(1);
     ptr -= 9;
@@ -121,8 +125,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
         ptr += 7;
         mem[ptr] = mem[ptr].wrapping_add(1);
         ptr -= 8;
-        mem[ptr] = 0;
-        mem[ptr] = mem[ptr].wrapping_add(1);
+        mem[ptr] = 1;
         while mem[ptr] != 0 {
             mem[ptr] = mem[ptr].wrapping_sub(1);
             ptr += 2;
@@ -191,7 +194,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                     ptr += 1;
                                                     mem[ptr] = mem[ptr].wrapping_add(1);
                                                     ptr -= 1;
-                                                    while mem[ptr] != 0 {
+                                                    if mem[ptr] != 0 {
                                                         mem[ptr] = mem[ptr].wrapping_sub(1);
                                                         ptr += 1;
                                                         mem[ptr] = mem[ptr].wrapping_sub(9);
@@ -199,7 +202,6 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                         mem[ptr] = mem[ptr].wrapping_add(1);
                                                         ptr -= 10;
                                                         mem[ptr + 1] += mem[ptr];
-                                                        mem[ptr] = 0;
                                                     }
                                                 }
                                             }
@@ -268,7 +270,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                     ptr -= 1;
                                                     mem[ptr] = mem[ptr].wrapping_add(1);
                                                     ptr += 1;
-                                                    while mem[ptr] != 0 {
+                                                    if mem[ptr] != 0 {
                                                         mem[ptr] = mem[ptr].wrapping_sub(1);
                                                         ptr -= 1;
                                                         mem[ptr] = mem[ptr].wrapping_sub(9);
@@ -276,7 +278,6 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                         mem[ptr] = mem[ptr].wrapping_add(1);
                                                         ptr -= 10;
                                                         mem[ptr - 1] += mem[ptr];
-                                                        mem[ptr] = 0;
                                                     }
                                                 }
                                             }
@@ -563,7 +564,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                         ptr -= 6;
                                                         mem[ptr] = mem[ptr].wrapping_add(1);
                                                         ptr += 6;
-                                                        while mem[ptr] != 0 {
+                                                        if mem[ptr] != 0 {
                                                             mem[ptr] = mem[ptr].wrapping_sub(1);
                                                             ptr -= 6;
                                                             mem[ptr] = mem[ptr].wrapping_sub(9);
@@ -571,7 +572,6 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                             mem[ptr] = mem[ptr].wrapping_add(1);
                                                             ptr -= 10;
                                                             mem[ptr - 6] += mem[ptr];
-                                                            mem[ptr] = 0;
                                                         }
                                                     }
                                                 }
@@ -647,7 +647,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                             ptr -= 7;
                                             mem[ptr] = mem[ptr].wrapping_add(1);
                                             ptr += 7;
-                                            while mem[ptr] != 0 {
+                                            if mem[ptr] != 0 {
                                                 mem[ptr] = mem[ptr].wrapping_sub(1);
                                                 ptr -= 7;
                                                 mem[ptr] = mem[ptr].wrapping_sub(1);
@@ -655,7 +655,6 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                 mem[ptr] = mem[ptr].wrapping_add(1);
                                                 ptr += 1;
                                                 mem[ptr - 7] += mem[ptr];
-                                                mem[ptr] = 0;
                                             }
                                         }
                                     }
@@ -666,8 +665,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                 }
                 ptr -= 7;
                 mem[ptr + 7] += mem[ptr];
-                mem[ptr] = 0;
-                mem[ptr] = mem[ptr].wrapping_sub(1);
+                mem[ptr] = 255;
                 ptr -= 10;
             }
             ptr += 7;
@@ -725,7 +723,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                             ptr -= 8;
                                             mem[ptr] = mem[ptr].wrapping_add(1);
                                             ptr += 8;
-                                            while mem[ptr] != 0 {
+                                            if mem[ptr] != 0 {
                                                 mem[ptr] = mem[ptr].wrapping_sub(1);
                                                 ptr -= 8;
                                                 mem[ptr] = mem[ptr].wrapping_sub(1);
@@ -733,7 +731,6 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                 mem[ptr] = mem[ptr].wrapping_add(1);
                                                 ptr += 3;
                                                 mem[ptr - 8] += mem[ptr];
-                                                mem[ptr] = 0;
                                             }
                                         }
                                     }
@@ -744,8 +741,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                 }
                 ptr -= 8;
                 mem[ptr + 8] += mem[ptr];
-                mem[ptr] = 0;
-                mem[ptr] = mem[ptr].wrapping_sub(1);
+                mem[ptr] = 255;
                 ptr -= 10;
             }
             ptr += 8;
@@ -854,8 +850,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
         while mem[ptr] != 0 {
             mem[ptr] = 0;
             ptr -= 1;
-            mem[ptr] = 0;
-            mem[ptr] = mem[ptr].wrapping_add(1);
+            mem[ptr] = 1;
             ptr += 4;
             mem[ptr] = mem[ptr].wrapping_add(1);
             ptr += 8;
@@ -973,7 +968,7 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                     ptr += 5;
                                                     mem[ptr] = mem[ptr].wrapping_add(1);
                                                     ptr -= 5;
-                                                    while mem[ptr] != 0 {
+                                                    if mem[ptr] != 0 {
                                                         mem[ptr] = mem[ptr].wrapping_sub(1);
                                                         ptr += 5;
                                                         mem[ptr] = mem[ptr].wrapping_sub(9);
@@ -981,7 +976,6 @@ pub fn bf_main<R: std::io::Read, W: std::io::Write>(mut reader: R, mut writer: W
                                                         mem[ptr] = mem[ptr].wrapping_add(1);
                                                         ptr -= 10;
                                                         mem[ptr + 5] += mem[ptr];
-                                                        mem[ptr] = 0;
                                                     }
                                                 }
                                             }

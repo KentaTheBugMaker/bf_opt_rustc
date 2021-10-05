@@ -30,11 +30,11 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
                 "reader.read_exact(&mut mem[ptr..ptr + 1]).unwrap();\n".to_owned()
             }
             OptInstruction::Write => "writer.write_all(&mem[ptr..ptr + 1]).unwrap();\n".to_owned(),
-            OptInstruction::LoopStart => {
+            OptInstruction::WhileStart => {
                 nest += 1;
                 "while mem[ptr] != 0 {\n".to_owned()
             }
-            OptInstruction::LoopEnd => {
+            OptInstruction::WhileEnd => {
                 nest -= 1;
                 "}\n".to_owned()
             }
@@ -104,6 +104,14 @@ pub fn emit_rust_code(opt_ir: &[OptInstruction]) -> String {
             },
             OptInstruction::Set(x) => {
                 format!("mem[ptr] = {};\n", x)
+            }
+            OptInstruction::IFStart => {
+                nest += 1;
+                "if mem[ptr] != 0 {\n".to_owned()
+            }
+            OptInstruction::IFEnd => {
+                nest-=1;
+                "}\n".to_owned()
             }
         };
         rust_code.push_str(&code_let);
